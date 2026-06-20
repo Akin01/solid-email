@@ -12,6 +12,7 @@ coverage/
 # Local agent/tooling caches
 .agents/
 skills-lock.json
+docs/
 
 # Local preview prototype is not part of the initial package set
 packages/preview/
