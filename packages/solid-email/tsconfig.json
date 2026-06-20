@@ -1,0 +1,7 @@
+{
+  "extends": "tsconfig/solid-library.json",
+  "compilerOptions": {
+    "outDir": "dist"
+  },
+  "include": ["src", "*.config.ts"]
+}
