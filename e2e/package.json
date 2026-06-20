@@ -1,0 +1,12 @@
+{
+  "name": "@solid-email/e2e",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@tanstack/solid-router": "catalog:",
+    "@tanstack/solid-start": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-solid": "catalog:"
+  }
+}

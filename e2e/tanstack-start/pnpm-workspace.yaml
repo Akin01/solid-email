@@ -1,0 +1,8 @@
+packages:
+  - .
+
+allowBuilds:
+  esbuild: true
+
+overrides:
+  '@solid-email/render': file:../.tmp/packs/solid-email-render-0.1.0.tgz

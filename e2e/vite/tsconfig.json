@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "target": "ES2022",
+    "types": ["node", "vite/client"],
+    "skipLibCheck": true,
+    "strict": true
+  },
+  "include": ["src", "vite.config.ts"],
+  "exclude": ["node_modules", "dist", ".types"]
+}

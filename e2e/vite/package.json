@@ -1,0 +1,14 @@
+{
+  "name": "solid-email-vite-e2e",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "vite build --ssr src/entry-server.tsx"
+  },
+  "dependencies": {
+    "@solid-email/render": "file:../.tmp/packs/solid-email-render-0.1.0.tgz",
+    "@akin01/solid-email": "file:../.tmp/packs/akin01-solid-email-0.1.0.tgz",
+    "solid-js": "1.9.13"
+  }
+}
