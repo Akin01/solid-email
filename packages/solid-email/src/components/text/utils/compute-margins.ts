@@ -1,4 +1,8 @@
-import { type SolidStyle, type StyleValue, styleObject } from '../../shared';
+import {
+  normalizeCssProperty,
+  type SolidStyle,
+  type StyleValue,
+} from '../../shared';
 
 type MarginValue = string | number | undefined;
 
@@ -75,7 +79,9 @@ export function computeMargins(style: SolidStyle = {}): MarginResult {
     'margin-left': undefined,
   };
 
-  for (const [property, value] of Object.entries(styleObject(style))) {
+  for (const key in style) {
+    const property = normalizeCssProperty(key);
+    const value = style[key];
     if (property === 'margin') result = parseMarginValue(value);
     else if (property === 'margin-top')
       result['margin-top'] = value ?? undefined;
