@@ -39,15 +39,18 @@ export function cls(props: Record<string, unknown>): string | undefined {
   return classValue.length > 0 ? classValue : undefined;
 }
 
-// Remove presentation-only props before spreading the remaining attributes.
+// Remove presentation-only props and children before spreading attributes onto
+// native elements. Reading children while cloning Solid props can eagerly resolve
+// nested JSX during SSR.
 export function withoutClass<T extends Record<string, unknown>>(
   props: T,
-): Omit<T, 'class' | 'className' | 'style'> {
+): Omit<T, 'class' | 'className' | 'style' | 'children'> {
   const copy = { ...props };
   delete copy.class;
   delete (copy as Record<string, unknown>).className;
   delete (copy as Record<string, unknown>).style;
-  return copy as Omit<T, 'class' | 'className' | 'style'>;
+  delete (copy as Record<string, unknown>).children;
+  return copy as Omit<T, 'class' | 'className' | 'style' | 'children'>;
 }
 
 // CSS properties that accept unitless numeric values. Other non-zero numbers
