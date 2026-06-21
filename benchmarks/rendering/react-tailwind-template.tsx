@@ -1,6 +1,6 @@
 /** @jsxRuntime automatic */
 /** @jsxImportSource react */
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import {
   Body,
   Button,
@@ -19,14 +19,25 @@ import {
   Text,
 } from 'react-email';
 import {
-  campaign,
   features,
   footerLinks,
+  marketingProps,
   products,
   updates,
 } from './fixture-data';
 
-export function ReactTailwindEmail(): ReactElement {
+export type ReactTailwindEmailProps = {
+  preview?: string;
+  headline?: ReactNode;
+  intro?: ReactNode;
+  ctaHref?: string;
+  footerReason?: ReactNode;
+};
+
+export function ReactTailwindEmail(
+  props: ReactTailwindEmailProps = {},
+): ReactElement {
+  const data = { ...marketingProps, ...props };
   return (
     <Tailwind
       config={{
@@ -42,7 +53,7 @@ export function ReactTailwindEmail(): ReactElement {
     >
       <Html lang="en">
         <Head />
-        <Preview>{campaign.preview}</Preview>
+        <Preview>{data.preview}</Preview>
         <Body className="m-0 bg-[#f6f9fc] font-email text-[#1f2937]">
           <Container className="mx-auto my-8 w-[640px] rounded-2xl border border-solid border-[#e5e7eb] bg-white p-8 md:p-10">
             <Section className="rounded-[14px] bg-[#111827] p-8 text-white">
@@ -50,16 +61,16 @@ export function ReactTailwindEmail(): ReactElement {
                 as="h1"
                 className="m-0 mb-4 text-[32px] leading-[40px] text-white"
               >
-                {campaign.headline}
+                {data.headline}
               </Heading>
               <Text className="m-0 mb-6 text-base leading-[26px] text-[#d1d5db]">
-                {campaign.intro}
+                {data.intro}
               </Text>
               <Button
                 className="rounded-lg bg-[#7c3aed] px-[22px] py-[14px] text-[15px] font-bold text-white no-underline"
-                href={campaign.ctaHref}
+                href={data.ctaHref}
               >
-                {campaign.ctaLabel}
+                View the launch notes
               </Button>
             </Section>
 
@@ -148,8 +159,7 @@ export function ReactTailwindEmail(): ReactElement {
 
             <Section className="text-center">
               <Text className="m-0 mb-2 text-xs leading-5 text-[#6b7280]">
-                You are receiving this benchmark email because rendering speed
-                is being measured.
+                {data.footerReason}
               </Text>
               <Text className="m-0 mb-2 text-xs leading-5 text-[#6b7280]">
                 {footerLinks.map(([label, href], index) => (
@@ -169,4 +179,6 @@ export function ReactTailwindEmail(): ReactElement {
   );
 }
 
-export const createReactTailwindEmail = () => <ReactTailwindEmail />;
+export const createReactTailwindEmail = (props?: ReactTailwindEmailProps) => (
+  <ReactTailwindEmail {...props} />
+);

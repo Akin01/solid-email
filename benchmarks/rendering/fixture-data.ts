@@ -7,6 +7,16 @@ export const campaign = {
   ctaLabel: 'View the launch notes',
 };
 
+export const marketingProps = {
+  preview: campaign.preview,
+  headline: campaign.headline,
+  intro: campaign.intro,
+  ctaHref: campaign.ctaHref,
+  ctaLabel: campaign.ctaLabel,
+  footerReason:
+    'You are receiving this benchmark email because rendering speed is being measured.',
+};
+
 export const features = [
   {
     title: 'Composable components',

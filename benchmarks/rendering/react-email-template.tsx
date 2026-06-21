@@ -1,6 +1,6 @@
 /** @jsxRuntime automatic */
 /** @jsxImportSource react */
-import type { CSSProperties, ReactElement } from 'react';
+import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import {
   Body,
   Button,
@@ -18,27 +18,38 @@ import {
   Text,
 } from 'react-email';
 import {
-  campaign,
   features,
   footerLinks,
+  marketingProps,
   products,
   updates,
 } from './fixture-data';
 
-export function ReactMarketingEmail(): ReactElement {
+export type ReactMarketingEmailProps = {
+  preview?: string;
+  headline?: ReactNode;
+  intro?: ReactNode;
+  ctaHref?: string;
+  footerReason?: ReactNode;
+};
+
+export function ReactMarketingEmail(
+  props: ReactMarketingEmailProps = {},
+): ReactElement {
+  const data = { ...marketingProps, ...props };
   return (
     <Html lang="en">
       <Head />
-      <Preview>{campaign.preview}</Preview>
+      <Preview>{data.preview}</Preview>
       <Body style={styles.body}>
         <Container style={styles.container}>
           <Section style={styles.hero}>
             <Heading as="h1" style={styles.heading}>
-              {campaign.headline}
+              {data.headline}
             </Heading>
-            <Text style={styles.intro}>{campaign.intro}</Text>
-            <Button href={campaign.ctaHref} style={styles.button}>
-              {campaign.ctaLabel}
+            <Text style={styles.intro}>{data.intro}</Text>
+            <Button href={data.ctaHref} style={styles.button}>
+              View the launch notes
             </Button>
           </Section>
 
@@ -101,10 +112,7 @@ export function ReactMarketingEmail(): ReactElement {
           <Hr style={styles.rule} />
 
           <Section style={styles.footer}>
-            <Text style={styles.footerText}>
-              You are receiving this benchmark email because rendering speed is
-              being measured.
-            </Text>
+            <Text style={styles.footerText}>{data.footerReason}</Text>
             <Text style={styles.footerText}>
               {footerLinks.map(([label, href], index) => (
                 <span key={href}>
@@ -122,7 +130,9 @@ export function ReactMarketingEmail(): ReactElement {
   );
 }
 
-export const createReactMarketingEmail = () => <ReactMarketingEmail />;
+export const createReactMarketingEmail = (props?: ReactMarketingEmailProps) => (
+  <ReactMarketingEmail {...props} />
+);
 
 const styles = {
   body: {

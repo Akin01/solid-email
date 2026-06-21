@@ -15,16 +15,25 @@ import {
   Tailwind,
   Text,
 } from '@akin01/solid-email';
-import { For } from 'solid-js';
+import { For, type JSX } from 'solid-js';
 import {
-  campaign,
   features,
   footerLinks,
+  marketingProps,
   products,
   updates,
 } from '../rendering/fixture-data';
 
-export function SolidTailwindEmail() {
+export type SolidTailwindEmailProps = {
+  preview?: string;
+  headline?: JSX.Element;
+  intro?: JSX.Element;
+  ctaHref?: string;
+  footerReason?: JSX.Element;
+};
+
+export function SolidTailwindEmail(props: SolidTailwindEmailProps = {}) {
+  const data = { ...marketingProps, ...props };
   return (
     <Tailwind
       config={{
@@ -40,7 +49,7 @@ export function SolidTailwindEmail() {
     >
       <Html lang="en">
         <Head />
-        <Preview>{campaign.preview}</Preview>
+        <Preview>{data.preview}</Preview>
         <Body class="m-0 bg-[#f6f9fc] font-email text-[#1f2937]">
           <Container class="mx-auto my-8 w-[640px] rounded-2xl border border-solid border-[#e5e7eb] bg-white p-8 md:p-10">
             <Section class="rounded-[14px] bg-[#111827] p-8 text-white">
@@ -48,16 +57,16 @@ export function SolidTailwindEmail() {
                 as="h1"
                 class="m-0 mb-4 text-[32px] leading-[40px] text-white"
               >
-                {campaign.headline}
+                {data.headline}
               </Heading>
               <Text class="m-0 mb-6 text-base leading-[26px] text-[#d1d5db]">
-                {campaign.intro}
+                {data.intro}
               </Text>
               <Button
                 class="rounded-lg bg-[#7c3aed] px-[22px] py-[14px] text-[15px] font-bold text-white no-underline"
-                href={campaign.ctaHref}
+                href={data.ctaHref}
               >
-                {campaign.ctaLabel}
+                View the launch notes
               </Button>
             </Section>
 
@@ -149,8 +158,7 @@ export function SolidTailwindEmail() {
 
             <Section class="text-center">
               <Text class="m-0 mb-2 text-xs leading-5 text-[#6b7280]">
-                You are receiving this benchmark email because rendering speed
-                is being measured.
+                {data.footerReason}
               </Text>
               <Text class="m-0 mb-2 text-xs leading-5 text-[#6b7280]">
                 <For each={footerLinks}>
@@ -172,4 +180,6 @@ export function SolidTailwindEmail() {
   );
 }
 
-export const createSolidTailwindEmail = () => <SolidTailwindEmail />;
+export const createSolidTailwindEmail = (props?: SolidTailwindEmailProps) => (
+  <SolidTailwindEmail {...props} />
+);

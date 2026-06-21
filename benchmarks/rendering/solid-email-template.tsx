@@ -14,29 +14,38 @@ import {
   Section,
   Text,
 } from '@akin01/solid-email';
-import { For } from 'solid-js';
+import { For, type JSX } from 'solid-js';
 import {
-  campaign,
   features,
   footerLinks,
+  marketingProps,
   products,
   updates,
 } from './fixture-data';
 
-export function SolidMarketingEmail() {
+export type SolidMarketingEmailProps = {
+  preview?: string;
+  headline?: JSX.Element;
+  intro?: JSX.Element;
+  ctaHref?: string;
+  footerReason?: JSX.Element;
+};
+
+export function SolidMarketingEmail(props: SolidMarketingEmailProps = {}) {
+  const data = { ...marketingProps, ...props };
   return (
     <Html lang="en">
       <Head />
-      <Preview>{campaign.preview}</Preview>
+      <Preview>{data.preview}</Preview>
       <Body style={styles.body}>
         <Container style={styles.container}>
           <Section style={styles.hero}>
             <Heading as="h1" style={styles.heading}>
-              {campaign.headline}
+              {data.headline}
             </Heading>
-            <Text style={styles.intro}>{campaign.intro}</Text>
-            <Button href={campaign.ctaHref} style={styles.button}>
-              {campaign.ctaLabel}
+            <Text style={styles.intro}>{data.intro}</Text>
+            <Button href={data.ctaHref} style={styles.button}>
+              View the launch notes
             </Button>
           </Section>
 
@@ -105,10 +114,7 @@ export function SolidMarketingEmail() {
           <Hr style={styles.rule} />
 
           <Section style={styles.footer}>
-            <Text style={styles.footerText}>
-              You are receiving this benchmark email because rendering speed is
-              being measured.
-            </Text>
+            <Text style={styles.footerText}>{data.footerReason}</Text>
             <Text style={styles.footerText}>
               <For each={footerLinks}>
                 {([label, href], index) => (
@@ -128,7 +134,9 @@ export function SolidMarketingEmail() {
   );
 }
 
-export const createSolidMarketingEmail = () => <SolidMarketingEmail />;
+export const createSolidMarketingEmail = (props?: SolidMarketingEmailProps) => (
+  <SolidMarketingEmail {...props} />
+);
 
 const styles = {
   body: {
