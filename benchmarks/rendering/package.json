@@ -1,0 +1,31 @@
+{
+  "name": "@benchmarks/rendering",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "benchmark": "pnpm solid-vs-react",
+    "solid-vs-react": "vitest bench --config vitest.config.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Akin01/solid-email",
+    "directory": "benchmarks/rendering"
+  },
+  "dependencies": {
+    "@akin01/solid-email": "workspace:*",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "react-email": "6.6.3",
+    "solid-js": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "tsconfig": "workspace:*",
+    "typescript": "catalog:",
+    "vite-plugin-solid": "catalog:",
+    "vitest": "catalog:"
+  }
+}

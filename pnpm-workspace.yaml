@@ -3,6 +3,7 @@ packages:
   - packages/solid-email
   - packages/tsconfig
   - e2e
+  - benchmarks/*
 
 allowBuilds:
   esbuild: true
@@ -16,6 +17,7 @@ catalog:
   '@types/babel__core': 7.20.5
   '@types/css-tree': 2.3.11
   '@types/node': 25.0.2
+  '@types/react': 19.2.14
   '@types/prismjs': 1.26.5
   '@types/html-to-text': 9.0.4
   '@types/mime-types': 3.0.1

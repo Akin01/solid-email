@@ -16,15 +16,19 @@
     "typecheck:e2e": "tsc -p e2e/tsconfig.json --noEmit",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
+    "benchmark": "pnpm -r --filter './benchmarks/*' run benchmark",
+    "benchmark:rendering": "pnpm --filter @benchmarks/rendering run solid-vs-react",
+    "benchmark:tailwind": "pnpm --filter @benchmarks/tailwind run with-vs-without",
+    "benchmark:ui": "pnpm --filter @benchmarks/ui run benchmark",
     "release:github": "node scripts/create-github-releases.mjs",
     "release:github:dry-run": "node scripts/create-github-releases.mjs --dry-run"
   },
   "devDependencies": {
-    "@solid-email/render": "workspace:*",
+    "@akin01/solid-email": "workspace:*",
     "@biomejs/biome": "catalog:",
+    "@solid-email/render": "workspace:*",
     "@types/node": "catalog:",
     "solid-js": "catalog:",
-    "@akin01/solid-email": "workspace:*",
     "tsx": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

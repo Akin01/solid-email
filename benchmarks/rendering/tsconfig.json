@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "tsconfig/solid-library.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@akin01/solid-email": ["../../packages/solid-email/src/index.ts"],
+      "@solid-email/render": ["../../packages/render/src/node/index.ts"]
+    },
+    "types": ["node", "vitest/globals"]
+  },
+  "include": [
+    "fixture-data.ts",
+    "react-email-template.tsx",
+    "rendering.bench.ts",
+    "solid-email-template.tsx",
+    "../utils.ts",
+    "../../packages/render/src/shared/solid-js-web-server.d.ts"
+  ],
+  "exclude": ["dist", "node_modules"]
+}

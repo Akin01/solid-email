@@ -1,0 +1,28 @@
+{
+  "name": "@benchmarks/ui",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "benchmark": "vitest bench --config vitest.config.ts",
+    "email-previews": "UI_BENCH_USECASE=hot vitest bench --config vitest.config.ts",
+    "cold-email-previews": "UI_BENCH_USECASE=cold vitest bench --config vitest.config.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Akin01/solid-email",
+    "directory": "benchmarks/ui"
+  },
+  "dependencies": {
+    "@akin01/solid-email": "workspace:*",
+    "solid-js": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsconfig": "workspace:*",
+    "typescript": "catalog:",
+    "vite-plugin-solid": "catalog:",
+    "vitest": "catalog:"
+  }
+}
