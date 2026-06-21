@@ -62,9 +62,13 @@ When the same template is rendered multiple times with different data, `compile(
 
 ```tsx
 import { compile, Slot, slot } from '@solid-email/render';
-import { WelcomeEmail } from './welcome-email';
 
-const compiled = await compile(() => <WelcomeEmail name="" actionUrl="" />);
+const compiled = await compile(
+  <p>
+    Hello <Slot name="name" />!
+    <a href={slot('actionUrl')}>Start</a>
+  </p>,
+);
 
 const html = await compiled.render({ name: 'Alice', actionUrl: 'https://example.com/start' });
 const html2 = await compiled.render({ name: 'Bob', actionUrl: 'https://other.com' });
@@ -87,6 +91,11 @@ const compiled = await compile(
 const html = await compiled.render({ name: 'Alice', url: 'https://example.com' });
 ```
 
+Content slots accept string, number, boolean, null, undefined, JSX, and arrays.
+Attribute slots accept only string, number, boolean, null, and undefined; passing
+JSX, objects, or arrays to an attribute slot throws. Use `<Slot />` for
+JSX/content values.
+
 For typed slot names, use `defineSlots<T>()`:
 
 ```tsx
@@ -95,12 +104,40 @@ import { compile, defineSlots } from '@solid-email/render';
 type MySlots = { name: string; url: string };
 const slots = defineSlots<MySlots>();
 
-const compiled = await compile(
+const compiled = await compile<MySlots>(
   <p>
     {slots.content('name', 'Guest')}
     <a href={slots.attr('url')}>Visit</a>
   </p>,
 );
+```
+
+Pass slot markers through props when adapting existing prop-driven components:
+
+```tsx
+import type { JSX } from 'solid-js';
+import { compile, Slot, slot } from '@solid-email/render';
+
+function Button(props: { href: string; children: JSX.Element }) {
+  return <a href={props.href}>{props.children}</a>;
+}
+
+function WelcomeEmail(props: { name: JSX.Element; actionUrl: string }) {
+  return (
+    <p>
+      Hello {props.name}! <Button href={props.actionUrl}>Open dashboard</Button>
+    </p>
+  );
+}
+
+const compiled = await compile(
+  <WelcomeEmail name={<Slot name="name" />} actionUrl={slot('actionUrl')} />,
+);
+
+const html = await compiled.render({
+  name: 'Alice',
+  actionUrl: 'https://example.com/dashboard',
+});
 ```
 
 Tailwind classes must be on static parent elements, not on Slot components. Slot values at runtime use inline styles or fall back to `render()`.

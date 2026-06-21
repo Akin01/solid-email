@@ -33,14 +33,14 @@ Measured with `pnpm benchmark:rendering` on the repository marketing email fixtu
 
 | Renderer | Template | Mean | Throughput | Comparison |
 | --- | --- | ---: | ---: | --- |
-| Solid Email `render()` | Static JSX | 3.8375ms | 260.58 hz | 4.53x faster than React Email `render()` |
-| Solid Email `renderSync()` | Static JSX | 4.6953ms | 212.98 hz | 3.70x faster than React Email `render()` |
-| Solid Email `render()` | Tailwind JSX | 11.6995ms | 85.47 hz | 3.07x faster than React Email Tailwind |
-| Solid Email `compileSync` render (cached) | Static JSX | 0.0107ms | 93,571 hz | 1,626x faster than React Email `render()` |
-| Solid Email `compile` render (cached) | Static JSX | 0.0816ms | 12,248 hz | 213x faster than React Email `render()` |
-| Solid Email `compile` render (cached) | Tailwind JSX | 0.0574ms | 17,429 hz | 303x faster than React Email Tailwind |
-| React Email `render()` | Static JSX | 17.3786ms | 57.54 hz | Baseline |
-| React Email `render()` | Tailwind JSX | 35.7052ms | 28.00 hz | Tailwind baseline |
+| Solid Email `render()` | Static JSX | 2.2919ms | 436.33 hz | 5.02x faster than React Email `render()` |
+| Solid Email `renderSync()` | Static JSX | 1.8935ms | 528.13 hz | 6.08x faster than React Email `render()` |
+| Solid Email `render()` | Tailwind JSX | 3.1230ms | 320.20 hz | 5.69x faster than React Email Tailwind |
+| Solid Email `compileSync` render (cached) | Static JSX | 0.0438ms | 22,842 hz | 263x faster than React Email `render()` |
+| Solid Email `compile` render (cached) | Static JSX | 0.0858ms | 11,661 hz | 134x faster than React Email `render()` |
+| Solid Email `compile` render (cached) | Tailwind JSX | 0.0452ms | 22,145 hz | 393x faster than React Email Tailwind |
+| React Email `render()` | Static JSX | 11.5084ms | 86.89 hz | Baseline |
+| React Email `render()` | Tailwind JSX | 17.7760ms | 56.26 hz | Tailwind baseline |
 
 **Cached** means the template is compiled once and only the render step is measured. This is the expected production usage — compile at module load, render per request. The "one-time" compile+render cost is comparable to calling `render()` directly.
 
@@ -48,9 +48,9 @@ Bundle size compares built ESM entry files after `pnpm build`; gzip uses Node's 
 
 | Package entry | Raw size | Gzip size | Comparison |
 | --- | ---: | ---: | --- |
-| `@akin01/solid-email/dist/index.mjs` | 198.5 KiB | 42.2 KiB | Components entry |
-| `@solid-email/render/dist/node/index.mjs` | 4.5 KiB | 1.7 KiB | Renderer entry |
-| Solid Email combined entries | 203.0 KiB | 43.7 KiB | 7.1x smaller raw / 8.0x smaller gzip than React Email |
+| `@akin01/solid-email/dist/index.mjs` | 198.7 KiB | 42.3 KiB | Components entry |
+| `@solid-email/render/dist/node/index.mjs` | 13.3 KiB | 3.7 KiB | Renderer entry |
+| Solid Email combined entries | 211.9 KiB | 46.0 KiB | 6.8x smaller raw / 7.5x smaller gzip than React Email |
 | `react-email/dist/index.mjs` | 1,448.0 KiB | 347.4 KiB | React Email baseline |
 
 ## Install
@@ -106,7 +106,7 @@ When you render the same template multiple times with different data, `compile()
 import { compile, Slot, slot } from '@solid-email/render';
 import { Html, Body, Container, Text } from '@akin01/solid-email';
 
-function WelcomeEmail(props: { name: string; url: string }) {
+function WelcomeEmail() {
   return (
     <Html>
       <Body>
@@ -121,7 +121,7 @@ function WelcomeEmail(props: { name: string; url: string }) {
   );
 }
 
-const compiled = await compile(() => <WelcomeEmail name="" url="" />);
+const compiled = await compile(() => <WelcomeEmail />);
 
 const html = await compiled.render({ name: 'Alice', url: 'https://example.com' });
 const html2 = await compiled.render({ name: 'Bob', url: 'https://other.com' });
@@ -140,6 +140,11 @@ Slots mark the dynamic parts of a compiled template.
 | `defineSlots<T>()` | Strongly typed slot names for editor autocomplete. |
 | `CompiledTemplate.render(data)` | Re-render the template with new slot values. |
 | `CompiledTemplate.renderSync(data)` | Synchronous re-render (no `pretty`). |
+
+Content slots accept string, number, boolean, null, undefined, JSX, and arrays.
+Attribute slots accept only string, number, boolean, null, and undefined; passing
+JSX, objects, or arrays to an attribute slot throws so broken links and images do
+not silently ship. Use `<Slot name="..." />` for JSX/content values.
 
 #### Weak types (untyped slots)
 
@@ -172,7 +177,7 @@ type MySlots = {
 
 const slots = defineSlots<MySlots>();
 
-const compiled = await compile(
+const compiled = await compile<MySlots>(
   <p>
     Hello {slots.content('name')}!
     <a href={slots.attr('url')}>Visit</a>
@@ -184,6 +189,38 @@ const html = await compiled.render({ name: 'Alice', url: 'https://example.com' }
 ```
 
 Content slots support defaults via the second argument: `slots.content('name', 'Guest')`.
+
+#### Slots as props
+
+Pass slot markers through component props when adapting existing prop-driven
+components. Props passed to `compile()` are template-time values, so pass
+`<Slot />` or `slot()` as the prop value for data that changes per render.
+
+```tsx
+import type { JSX } from 'solid-js';
+import { compile, Slot, slot } from '@solid-email/render';
+
+function Button(props: { href: string; children: JSX.Element }) {
+  return <a href={props.href}>{props.children}</a>;
+}
+
+function WelcomeEmail(props: { name: JSX.Element; actionUrl: string }) {
+  return (
+    <p>
+      Hello {props.name}! <Button href={props.actionUrl}>Open dashboard</Button>
+    </p>
+  );
+}
+
+const compiled = await compile(
+  <WelcomeEmail name={<Slot name="name" />} actionUrl={slot('url')} />,
+);
+
+const html = await compiled.render({
+  name: 'Alice',
+  url: 'https://example.com/dashboard',
+});
+```
 
 ### Tailwind with compiled templates
 
