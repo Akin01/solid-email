@@ -1,8 +1,5 @@
 import type { JSX } from 'solid-js';
-import {
-  renderToString,
-  renderToStringAsync,
-} from 'solid-js/web/dist/server.js';
+import { renderToString, renderToStringAsync } from 'solid-js/web';
 import type { Options, RenderSyncOptions } from './options';
 import { pretty } from './utils/pretty';
 import { toPlainText } from './utils/to-plain-text';
@@ -12,7 +9,7 @@ export type Renderable = JSX.Element | (() => JSX.Element);
 const doctype =
   '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">';
 
-function normalizeRenderable(node: Renderable) {
+export function normalizeRenderable(node: Renderable) {
   return typeof node === 'function' ? (node as () => JSX.Element) : () => node;
 }
 
@@ -29,7 +26,7 @@ function decodeSerializedString(value: string): string {
   }
 }
 
-function removeSolidResourceScripts(html: string): string {
+export function removeSolidResourceScripts(html: string): string {
   const errorMatch = /Object\.assign\(new Error\("((?:\\.|[^"\\])*)"\)/.exec(
     html,
   );
@@ -42,11 +39,14 @@ function removeSolidResourceScripts(html: string): string {
   );
 }
 
-function renderDocument(html: string): string {
+export function renderDocument(html: string): string {
   return `${doctype}${html.replace(/<!DOCTYPE.*?>/, '')}`;
 }
 
-function renderSyncOutput(html: string, options?: RenderSyncOptions): string {
+export function renderSyncOutput(
+  html: string,
+  options?: RenderSyncOptions,
+): string {
   if (options?.plainText) {
     return toPlainText(html, options.htmlToTextOptions);
   }
@@ -54,7 +54,10 @@ function renderSyncOutput(html: string, options?: RenderSyncOptions): string {
   return renderDocument(html);
 }
 
-async function renderOutput(html: string, options?: Options): Promise<string> {
+export async function renderOutput(
+  html: string,
+  options?: Options,
+): Promise<string> {
   if (options?.plainText) {
     return toPlainText(html, options.htmlToTextOptions);
   }
