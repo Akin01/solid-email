@@ -45,11 +45,17 @@ export function cls(props: Record<string, unknown>): string | undefined {
 export function withoutClass<T extends Record<string, unknown>>(
   props: T,
 ): Omit<T, 'class' | 'className' | 'style' | 'children'> {
-  const copy = { ...props };
-  delete copy.class;
-  delete (copy as Record<string, unknown>).className;
-  delete (copy as Record<string, unknown>).style;
-  delete (copy as Record<string, unknown>).children;
+  const copy: Record<string, unknown> = {};
+  for (const key in props) {
+    if (
+      key !== 'class' &&
+      key !== 'className' &&
+      key !== 'style' &&
+      key !== 'children'
+    ) {
+      copy[key] = props[key];
+    }
+  }
   return copy as Omit<T, 'class' | 'className' | 'style' | 'children'>;
 }
 
