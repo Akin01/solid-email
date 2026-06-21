@@ -12,14 +12,17 @@ import {
   logFixtureBytes,
 } from '../utils';
 import { createReactMarketingEmail } from './react-email-template';
+import { createReactTailwindEmail } from './react-tailwind-template';
 import { createSolidMarketingEmail } from './solid-email-template';
 
 const solidSyncHtml = renderSolidEmailSync(createSolidMarketingEmail);
-const [solidAsyncHtml, solidTailwindHtml, reactHtml] = await Promise.all([
-  renderSolidEmail(createSolidMarketingEmail),
-  renderSolidEmail(createSolidTailwindEmail),
-  renderReactEmail(createReactMarketingEmail()),
-]);
+const [solidAsyncHtml, solidTailwindHtml, reactHtml, reactTailwindHtml] =
+  await Promise.all([
+    renderSolidEmail(createSolidMarketingEmail),
+    renderSolidEmail(createSolidTailwindEmail),
+    renderReactEmail(createReactMarketingEmail()),
+    renderReactEmail(createReactTailwindEmail()),
+  ]);
 
 assertIncludes('solid-email renderSync', solidSyncHtml, [
   'Launch Week',
@@ -45,12 +48,19 @@ assertIncludes('react-email', reactHtml, [
   'Release note 12',
   'View the launch notes',
 ]);
+assertIncludes('react-email render with Tailwind', reactTailwindHtml, [
+  'Launch Week',
+  'Tailwind fixture coverage',
+  'Release note 12',
+  'View the launch notes',
+]);
 
 logFixtureBytes({
   'solid-email renderSync': Buffer.byteLength(solidSyncHtml),
   'solid-email render': Buffer.byteLength(solidAsyncHtml),
   'solid-email render with Tailwind': Buffer.byteLength(solidTailwindHtml),
   'react-email render': Buffer.byteLength(reactHtml),
+  'react-email render with Tailwind': Buffer.byteLength(reactTailwindHtml),
 });
 const options = iterationBenchmarkOptions();
 logBenchmarkSettings(options);
@@ -89,6 +99,15 @@ describe('email rendering use cases', () => {
     'react-email render',
     async () => {
       const html = await renderReactEmail(createReactMarketingEmail());
+      renderedBytes += html.length;
+    },
+    options,
+  );
+
+  bench(
+    'react-email render Tailwind template',
+    async () => {
+      const html = await renderReactEmail(createReactTailwindEmail());
       renderedBytes += html.length;
     },
     options,

@@ -12,6 +12,7 @@
   "include": [
     "fixture-data.ts",
     "react-email-template.tsx",
+    "react-tailwind-template.tsx",
     "rendering.bench.ts",
     "solid-email-template.tsx",
     "../tailwind/solid-tailwind-template.tsx",

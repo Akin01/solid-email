@@ -4,7 +4,10 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   plugins: [
     solid({
-      exclude: ['**/react-email-template.tsx'],
+      exclude: [
+        '**/react-email-template.tsx',
+        '**/react-tailwind-template.tsx',
+      ],
       ssr: true,
       solid: { hydratable: false },
     }),
