@@ -1,6 +1,6 @@
 {
   "name": "@solid-email/render",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Transform Solid components into HTML email templates",
   "repository": {
     "type": "git",
