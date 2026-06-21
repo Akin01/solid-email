@@ -1,5 +1,8 @@
 import type { JSX } from 'solid-js';
-import { renderToString, renderToStringAsync } from 'solid-js/web/dist/server.js';
+import {
+  renderToString,
+  renderToStringAsync,
+} from 'solid-js/web/dist/server.js';
 import type { Options, RenderSyncOptions } from './options';
 import type { Renderable } from './render';
 import {
@@ -33,7 +36,7 @@ export class CompiledTemplate<
   async render(data: TSlots, options?: Options): Promise<string> {
     let result = this.html;
 
-    result = this.replaceSlots(result, data);
+    result = await this.replaceSlots(result, data);
 
     return renderOutput(result, options ?? this.options);
   }
@@ -45,7 +48,7 @@ export class CompiledTemplate<
 
     let result = this.html;
 
-    result = this.replaceSlots(result, data);
+    result = this.replaceSlotsSync(result, data);
 
     return renderSyncOutput(
       result,
@@ -79,13 +82,46 @@ export class CompiledTemplate<
     );
   }
 
-  private replaceSlots(result: string, data: TSlots): string {
+  private async replaceSlots(result: string, data: TSlots): Promise<string> {
     const replacements = new Map<string, string>();
 
     for (const [name, occurrences] of this.contentSlots) {
       const value = data[name as keyof TSlots] as SlotValue | undefined;
       if (value !== undefined) {
-        const rendered = renderSlotValue(value);
+        const rendered = await renderSlotValueAsync(value);
+        for (const occ of occurrences) {
+          replacements.set(occ.full, rendered);
+        }
+      } else {
+        for (const occ of occurrences) {
+          replacements.set(occ.full, occ.defaultValue);
+        }
+      }
+    }
+
+    for (const [name, markers] of this.attrSlots) {
+      const value = data[name as keyof TSlots] as SlotValue | undefined;
+      const replacement = renderAttrValue(value);
+      for (const marker of markers) {
+        replacements.set(marker, replacement);
+      }
+    }
+
+    if (replacements.size === 0) return result;
+
+    return result.replace(
+      this.markerRegex,
+      (marker) => replacements.get(marker) ?? marker,
+    );
+  }
+
+  private replaceSlotsSync(result: string, data: TSlots): string {
+    const replacements = new Map<string, string>();
+
+    for (const [name, occurrences] of this.contentSlots) {
+      const value = data[name as keyof TSlots] as SlotValue | undefined;
+      if (value !== undefined) {
+        const rendered = renderSlotValueSync(value);
         for (const occ of occurrences) {
           replacements.set(occ.full, rendered);
         }
@@ -113,9 +149,24 @@ export class CompiledTemplate<
   }
 }
 
-function renderSlotValue(value: SlotValue): string {
+async function renderSlotValueAsync(value: SlotValue): Promise<string> {
   if (value == null) return '';
-  if (Array.isArray(value)) return value.map(renderSlotValue).join('');
+  if (Array.isArray(value))
+    return Promise.all(value.map(renderSlotValueAsync)).then((results) =>
+      results.join(''),
+    );
+  if (typeof value === 'boolean') return value ? 'true' : '';
+  if (typeof value === 'string') return escapeHtml(value);
+  if (typeof value === 'number') return String(value);
+  const html = removeSolidResourceScripts(
+    await renderToStringAsync(() => value as JSX.Element),
+  );
+  return html;
+}
+
+function renderSlotValueSync(value: SlotValue): string {
+  if (value == null) return '';
+  if (Array.isArray(value)) return value.map(renderSlotValueSync).join('');
   if (typeof value === 'boolean') return value ? 'true' : '';
   if (typeof value === 'string') return escapeHtml(value);
   if (typeof value === 'number') return String(value);
@@ -123,6 +174,10 @@ function renderSlotValue(value: SlotValue): string {
     renderToString(() => value as JSX.Element),
   );
   return html;
+}
+
+function _renderSlotValue(value: SlotValue): string {
+  return renderSlotValueSync(value);
 }
 
 function renderAttrValue(value: unknown): string {
