@@ -11,6 +11,7 @@ import {
 
 function parseArgs(argv) {
   const options = {
+    dispatchPublish: false,
     dryRun: false,
     prerelease: false,
     version: undefined,
@@ -18,6 +19,10 @@ function parseArgs(argv) {
 
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
+    if (arg === '--dispatch-publish') {
+      options.dispatchPublish = true;
+      continue;
+    }
     if (arg === '--dry-run') {
       options.dryRun = true;
       continue;
@@ -117,6 +122,22 @@ try {
     if (options.prerelease) args.push('--prerelease');
 
     assertGhSuccess(runGh(args), `Creating ${release.tag}`);
+
+    if (options.dispatchPublish) {
+      const ref = process.env.GITHUB_REF_NAME ?? 'main';
+      assertGhSuccess(
+        runGh([
+          'workflow',
+          'run',
+          'release.yml',
+          '--ref',
+          ref,
+          '-f',
+          `tag=${release.tag}`,
+        ]),
+        `Dispatching publish workflow for ${release.tag}`,
+      );
+    }
   }
 } finally {
   rmSync(tempDir, { recursive: true, force: true });

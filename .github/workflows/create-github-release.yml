@@ -14,6 +14,7 @@ on:
         type: boolean
 
 permissions:
+  actions: write
   contents: write
 
 concurrency:
@@ -43,4 +44,5 @@ jobs:
           if [ "$PRERELEASE" = "true" ]; then
             ARGS+=(--prerelease)
           fi
+          ARGS+=(--dispatch-publish)
           node scripts/create-github-releases.mjs "${ARGS[@]}"
