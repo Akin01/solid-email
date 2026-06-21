@@ -1,5 +1,5 @@
 import type { JSX } from 'solid-js';
-import { renderToString, renderToStringAsync } from 'solid-js/web';
+import { renderToString, renderToStringAsync } from 'solid-js/web/dist/server.js';
 import type { Options, RenderSyncOptions } from './options';
 import { pretty } from './utils/pretty';
 import { toPlainText } from './utils/to-plain-text';
