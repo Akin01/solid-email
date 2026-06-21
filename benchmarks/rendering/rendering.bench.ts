@@ -4,6 +4,7 @@ import {
 } from '@akin01/solid-email';
 import { render as renderReactEmail } from 'react-email';
 import { afterAll, bench, describe } from 'vitest';
+import { createSolidTailwindEmail } from '../tailwind/solid-tailwind-template';
 import {
   assertIncludes,
   iterationBenchmarkOptions,
@@ -14,8 +15,9 @@ import { createReactMarketingEmail } from './react-email-template';
 import { createSolidMarketingEmail } from './solid-email-template';
 
 const solidSyncHtml = renderSolidEmailSync(createSolidMarketingEmail);
-const [solidAsyncHtml, reactHtml] = await Promise.all([
+const [solidAsyncHtml, solidTailwindHtml, reactHtml] = await Promise.all([
   renderSolidEmail(createSolidMarketingEmail),
+  renderSolidEmail(createSolidTailwindEmail),
   renderReactEmail(createReactMarketingEmail()),
 ]);
 
@@ -31,6 +33,12 @@ assertIncludes('solid-email render', solidAsyncHtml, [
   'Release note 12',
   'View the launch notes',
 ]);
+assertIncludes('solid-email render with Tailwind', solidTailwindHtml, [
+  'Launch Week',
+  'Tailwind fixture coverage',
+  'Release note 12',
+  'View the launch notes',
+]);
 assertIncludes('react-email', reactHtml, [
   'Launch Week',
   'Product highlights',
@@ -41,6 +49,7 @@ assertIncludes('react-email', reactHtml, [
 logFixtureBytes({
   'solid-email renderSync': Buffer.byteLength(solidSyncHtml),
   'solid-email render': Buffer.byteLength(solidAsyncHtml),
+  'solid-email render with Tailwind': Buffer.byteLength(solidTailwindHtml),
   'react-email render': Buffer.byteLength(reactHtml),
 });
 const options = iterationBenchmarkOptions();
@@ -62,6 +71,15 @@ describe('email rendering use cases', () => {
     'solid-email render async API static template',
     async () => {
       const html = await renderSolidEmail(createSolidMarketingEmail);
+      renderedBytes += html.length;
+    },
+    options,
+  );
+
+  bench(
+    'solid-email render async API Tailwind template',
+    async () => {
+      const html = await renderSolidEmail(createSolidTailwindEmail);
       renderedBytes += html.length;
     },
     options,
