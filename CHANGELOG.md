@@ -15,6 +15,11 @@ All notable changes to this project will be documented in this file.
 - Re-exported the compile and slot APIs from `@akin01/solid-email` so component consumers can import them from the package root.
 - Bumped monorepo package, fixture tarball, and Solid Email skill versions to `0.1.2`.
 
+### Related
+
+- PR #2: `feat: add compile API for cached template rendering`
+- Commit: [`513bc0f701b8`](https://github.com/Akin01/solid-email/commit/513bc0f701b87b1638ce501afcdb2583f47f39f2)
+
 ### Verified
 
 - `pnpm --filter @solid-email/render run test`
