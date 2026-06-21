@@ -117,9 +117,18 @@ export function normalizeCssValue(
 
 // Convert camelCase style keys to CSS property names while preserving custom
 // properties such as --brand-color.
+const normalizedCssProperties = new Map<string, string>();
+
 export function normalizeCssProperty(property: string): string {
   if (property.startsWith('--')) return property;
-  return property.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+  const cached = normalizedCssProperties.get(property);
+  if (cached) return cached;
+  const normalized = property.replace(
+    /[A-Z]/g,
+    (letter) => `-${letter.toLowerCase()}`,
+  );
+  normalizedCssProperties.set(property, normalized);
+  return normalized;
 }
 
 // Parse a CSS declaration string into the same normalized map used by object
