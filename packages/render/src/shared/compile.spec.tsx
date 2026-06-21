@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { compile, compileSync } from './compile';
 import { Slot, slot } from './slots';
 
@@ -45,18 +45,6 @@ describe('compile', () => {
     const html = await email.render({} as any);
     expect(html).toContain('<!');
     expect(html).not.toContain('__SM_CNT_');
-  });
-
-  it('renders JSX slot values', async () => {
-    const email = await compile(
-      <div>
-        <Slot name="body" />
-      </div>,
-    );
-    const html = await email.render({
-      body: <span class="highlight">Dynamic</span>,
-    });
-    expect(html).toContain('<span class="highlight">Dynamic</span>');
   });
 
   it('escapes HTML in string slot values', async () => {
@@ -290,5 +278,45 @@ describe('slot utilities', () => {
   it('slot() encodes special characters', () => {
     const marker = slot('my slot');
     expect(marker).toContain('my%20slot');
+  });
+});
+
+describe('runtime guards', () => {
+  it('warns when content slot has no default and no data', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const email = await compile(
+      <p>
+        <Slot name="name" />
+      </p>,
+    );
+    await email.render({});
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('Slot "name" has no default'),
+    );
+    warn.mockRestore();
+  });
+
+  it('does not warn when content slot has a default', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const email = await compile(
+      <p>
+        <Slot name="name">fallback</Slot>
+      </p>,
+    );
+    await email.render({});
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it('does not warn when slot data is provided', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const email = await compile(
+      <p>
+        <Slot name="name" />
+      </p>,
+    );
+    await email.render({ name: 'Alice' });
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
   });
 });

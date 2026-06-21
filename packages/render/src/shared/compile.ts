@@ -1,4 +1,3 @@
-import type { JSX } from 'solid-js';
 import {
   renderToString,
   renderToStringAsync,
@@ -82,20 +81,50 @@ export class CompiledTemplate<
     );
   }
 
+  private validateSlots(data: TSlots): void {
+    const allSlotNames = new Set([
+      ...this.contentSlots.keys(),
+      ...this.attrSlots.keys(),
+    ]);
+
+    for (const name of allSlotNames) {
+      const value = (data as Record<string, unknown>)[name];
+
+      if (value === undefined) {
+        const hasDefault =
+          this.contentSlots.get(name)?.some((occ) => occ.hasDefault) ?? false;
+        if (!hasDefault) {
+          console.warn(
+            `[solid-email] Slot "${name}" has no default and was not provided in render data. It will render as empty.`,
+          );
+        }
+      }
+
+      if (this.attrSlots.has(name) && value != null) {
+        const t = typeof value;
+        if (
+          Array.isArray(value) ||
+          (t !== 'string' && t !== 'number' && t !== 'boolean')
+        ) {
+          console.warn(
+            `[solid-email] Attribute slot "${name}" received ${Array.isArray(value) ? 'an array' : `type "${t}"`}. Attribute slots only support string, number, or boolean. The value will be ignored.`,
+          );
+        }
+      }
+    }
+  }
+
   private async replaceSlots(result: string, data: TSlots): Promise<string> {
+    this.validateSlots(data);
     const replacements = new Map<string, string>();
 
     for (const [name, occurrences] of this.contentSlots) {
       const value = data[name as keyof TSlots] as SlotValue | undefined;
-      if (value !== undefined) {
-        const rendered = await renderSlotValueAsync(value);
-        for (const occ of occurrences) {
-          replacements.set(occ.full, rendered);
-        }
-      } else {
-        for (const occ of occurrences) {
-          replacements.set(occ.full, occ.defaultValue);
-        }
+      const rendered =
+        value !== undefined ? await renderSlotValueAsync(value) : '';
+      const useDefault = value === undefined;
+      for (const occ of occurrences) {
+        replacements.set(occ.full, useDefault ? occ.defaultValue : rendered);
       }
     }
 
@@ -116,19 +145,15 @@ export class CompiledTemplate<
   }
 
   private replaceSlotsSync(result: string, data: TSlots): string {
+    this.validateSlots(data);
     const replacements = new Map<string, string>();
 
     for (const [name, occurrences] of this.contentSlots) {
       const value = data[name as keyof TSlots] as SlotValue | undefined;
-      if (value !== undefined) {
-        const rendered = renderSlotValueSync(value);
-        for (const occ of occurrences) {
-          replacements.set(occ.full, rendered);
-        }
-      } else {
-        for (const occ of occurrences) {
-          replacements.set(occ.full, occ.defaultValue);
-        }
+      const rendered = value !== undefined ? renderSlotValueSync(value) : '';
+      const useDefault = value === undefined;
+      for (const occ of occurrences) {
+        replacements.set(occ.full, useDefault ? occ.defaultValue : rendered);
       }
     }
 
@@ -158,10 +183,7 @@ async function renderSlotValueAsync(value: SlotValue): Promise<string> {
   if (typeof value === 'boolean') return value ? 'true' : '';
   if (typeof value === 'string') return escapeHtml(value);
   if (typeof value === 'number') return String(value);
-  const html = removeSolidResourceScripts(
-    await renderToStringAsync(() => value as JSX.Element),
-  );
-  return html;
+  return '';
 }
 
 function renderSlotValueSync(value: SlotValue): string {
@@ -170,14 +192,7 @@ function renderSlotValueSync(value: SlotValue): string {
   if (typeof value === 'boolean') return value ? 'true' : '';
   if (typeof value === 'string') return escapeHtml(value);
   if (typeof value === 'number') return String(value);
-  const html = removeSolidResourceScripts(
-    renderToString(() => value as JSX.Element),
-  );
-  return html;
-}
-
-function _renderSlotValue(value: SlotValue): string {
-  return renderSlotValueSync(value);
+  return '';
 }
 
 function renderAttrValue(value: unknown): string {

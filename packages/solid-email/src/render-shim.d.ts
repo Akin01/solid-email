@@ -33,7 +33,7 @@ declare module '@solid-email/render' {
   ): string;
 
   export type SlotPrimitive = string | number | boolean | null | undefined;
-  export type SlotValue = SlotPrimitive | JSX.Element | SlotValue[];
+  export type SlotValue = SlotPrimitive | SlotValue[];
   export type SlotRecord = Record<string, SlotValue>;
   export interface SlotOccurrence {
     full: string;
