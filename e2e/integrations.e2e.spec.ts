@@ -190,8 +190,16 @@ async function preparePackedPackages(): Promise<void> {
   await rm(path.join(e2eRoot, '.tmp'), { recursive: true, force: true });
   await mkdir(packDir, { recursive: true });
 
+  await runPnpm(['--filter', '@solid-email/html-to-text', 'run', 'build']);
   await runPnpm(['--filter', '@solid-email/render', 'run', 'build']);
   await runPnpm(['--filter', '@akin01/solid-email', 'run', 'build']);
+  await runPnpm([
+    '--filter',
+    '@solid-email/html-to-text',
+    'pack',
+    '--pack-destination',
+    packDir,
+  ]);
   await runPnpm([
     '--filter',
     '@solid-email/render',

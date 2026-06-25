@@ -1,13 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "tsconfig/solid-library.json",
+  "extends": "tsconfig/solid-node-vitest.json",
   "compilerOptions": {
-    "noEmit": true,
     "paths": {
       "@akin01/solid-email": ["../../packages/solid-email/src/index.ts"],
       "@solid-email/render": ["../../packages/render/src/node/index.ts"]
-    },
-    "types": ["node", "vitest/globals"]
+    }
   },
   "include": [
     "fixture-data.ts",
