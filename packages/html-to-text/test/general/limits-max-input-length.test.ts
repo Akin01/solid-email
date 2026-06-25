@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from 'vitest';
 
-import { convert } from '../../src/index'
+import { convert } from '../../src/index';
 
 afterEach(() => {
   vi.restoreAllMocks();

@@ -1,6 +1,6 @@
 import { test } from 'vitest';
-import { htmlToText } from '../../src/index'
-import { expectSnapshot } from '../snapshot-helpers'
+import { htmlToText } from '../../src/index';
+import { expectSnapshot } from '../snapshot-helpers';
 
 test('should decode html attribute entities from href', () => {
   expectSnapshot({
@@ -41,7 +41,6 @@ test('should return link with brackets by default', () => {
     input: '<a href="http://my.link">test</a>',
   });
 });
-
 
 test('should return link without brackets if linkBrackets is false', () => {
   expectSnapshot({

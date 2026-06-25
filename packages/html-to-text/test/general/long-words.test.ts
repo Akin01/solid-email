@@ -1,6 +1,6 @@
 import { test } from 'vitest';
-import { convert } from '../../src/index'
-import { expectSnapshot } from '../snapshot-helpers'
+import { convert } from '../../src/index';
+import { expectSnapshot } from '../snapshot-helpers';
 
 test('should split long words if forceWrapOnLimit is set, existing linefeeds converted to space', () => {
   expectSnapshot({

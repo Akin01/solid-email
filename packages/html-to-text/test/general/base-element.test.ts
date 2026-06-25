@@ -1,6 +1,6 @@
 import { test } from 'vitest';
-import { convert } from '../../src/index'
-import { expectSnapshot } from '../snapshot-helpers'
+import { convert } from '../../src/index';
+import { expectSnapshot } from '../snapshot-helpers';
 
 const HTML_EXAMPLE = /*html*/ `<html><body>
 <div id="outside-hat">OUTSIDE_HAT</div>

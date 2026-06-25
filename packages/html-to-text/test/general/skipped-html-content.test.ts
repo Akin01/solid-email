@@ -1,6 +1,6 @@
 import { test } from 'vitest';
-import { compile } from '../../src/index'
-import { expectCompiledSnapshot } from '../snapshot-helpers'
+import { compile } from '../../src/index';
+import { expectCompiledSnapshot } from '../snapshot-helpers';
 
 const defaultConvert = compile();
 

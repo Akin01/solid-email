@@ -1,6 +1,6 @@
 import { test } from 'vitest';
-import { htmlToText } from '../../src/index'
-import { expectSnapshot } from '../snapshot-helpers'
+import { htmlToText } from '../../src/index';
+import { expectSnapshot } from '../snapshot-helpers';
 
 test('should handle center tag in tables', () => {
   expectSnapshot({

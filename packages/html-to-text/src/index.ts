@@ -239,5 +239,4 @@ function convert(
   return compile(options)(html, metadata);
 }
 
-
 export { compile, convert, convert as htmlToText };

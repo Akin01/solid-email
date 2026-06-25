@@ -1,6 +1,6 @@
 import { test } from 'vitest';
-import { compile, convert } from '../../src/index'
-import { expectCompiledSnapshot, expectSnapshot } from '../snapshot-helpers'
+import { compile, convert } from '../../src/index';
+import { expectCompiledSnapshot, expectSnapshot } from '../snapshot-helpers';
 
 const defaultConvert = compile();
 const longStr =

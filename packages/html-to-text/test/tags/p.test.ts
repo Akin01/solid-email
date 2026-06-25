@@ -1,6 +1,6 @@
 import { test } from 'vitest';
-import { htmlToText } from '../../src/index'
-import { expectSnapshot } from '../snapshot-helpers'
+import { htmlToText } from '../../src/index';
+import { expectSnapshot } from '../snapshot-helpers';
 
 test('should separate paragraphs from surrounding content by two linebreaks', () => {
   expectSnapshot({

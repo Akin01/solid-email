@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { compile } from '../../src/index'
+import { compile } from '../../src/index';
 
 const defaultConvert = compile();
 

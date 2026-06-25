@@ -9,6 +9,10 @@ export default defineConfig({
         '../render/src/node/index.ts',
         import.meta.url,
       ).pathname,
+      '@solid-email/html-to-text': new URL(
+        '../html-to-text/src/index.ts',
+        import.meta.url,
+      ).pathname,
     },
   },
   test: { globals: true },

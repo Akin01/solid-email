@@ -1,6 +1,6 @@
 import { test } from 'vitest';
-import { htmlToText } from '../../src/index'
-import { expectSnapshot } from '../snapshot-helpers'
+import { htmlToText } from '../../src/index';
+import { expectSnapshot } from '../snapshot-helpers';
 
 test('should handle format single-line blockquote', () => {
   const html = 'foo<blockquote>test</blockquote>bar';

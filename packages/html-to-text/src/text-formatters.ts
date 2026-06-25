@@ -395,7 +395,6 @@ function getOrderedListIndexFunction(olType = '1'): (index: number) => string {
   }
 }
 
-
 function formatBlock(
   elem: DomNode,
   walk: RecursiveCallback,

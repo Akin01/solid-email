@@ -1,6 +1,6 @@
 import { test } from 'vitest';
-import { convert } from '../../src/index'
-import { expectDocumentSnapshot } from '../snapshot-helpers'
+import { convert } from '../../src/index';
+import { expectDocumentSnapshot } from '../snapshot-helpers';
 
 test('should convert invoice fixture document', () => {
   expectDocumentSnapshot({

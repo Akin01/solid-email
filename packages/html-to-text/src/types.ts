@@ -76,7 +76,6 @@ export interface SelectorDefinition {
   options?: FormatOptions | undefined;
 }
 
-
 export interface FormatOptions {
   leadingLineBreaks?: number | undefined;
   trailingLineBreaks?: number | undefined;
@@ -203,4 +202,3 @@ export type RecursiveCallback = (
   nodes: DomNode[] | undefined,
   builder: BlockTextBuilder,
 ) => void;
-

@@ -377,6 +377,7 @@ class BlockTextBuilder {
     }
 
     const prefixLength = Math.max(listItem.prefix.length, list.maxPrefixLength);
+    // biome-ignore lint/style/useTemplate: keep string concatenation readable here.
     const spacing = '\n' + ' '.repeat(prefixLength);
     const prefix =
       list.prefixAlign === 'right'

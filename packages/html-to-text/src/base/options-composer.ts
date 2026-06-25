@@ -44,9 +44,7 @@ const deepMergeWithOptionsComposeRules = deepmergeCustom<
   mergeArrays: (values, _utils, meta) => {
     const keyPath = meta?.keyPath ? meta.keyPath : [];
     const isRootSelectors = keyPath.length === 1 && keyPath[0] === 'selectors';
-    return isRootSelectors
-      ? values.flat()
-      : mergeArraysOverwrite(values);
+    return isRootSelectors ? values.flat() : mergeArraysOverwrite(values);
   },
   metaDataUpdater: (previousMeta, metaMeta) => {
     if (previousMeta === undefined) {

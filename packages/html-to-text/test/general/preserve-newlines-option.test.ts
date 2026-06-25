@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
-import { convert } from '../../src/index'
-import { expectSnapshot } from '../snapshot-helpers'
+import { convert } from '../../src/index';
+import { expectSnapshot } from '../snapshot-helpers';
 
 test('should not preserve newlines by default', () => {
   expectSnapshot({

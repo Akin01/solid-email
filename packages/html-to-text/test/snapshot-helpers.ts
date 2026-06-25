@@ -3,9 +3,11 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { expect } from 'vitest';
-import type { CompiledFunction,
-HtmlToTextOptions,
-MetaData, } from '../src/index'
+import type {
+  CompiledFunction,
+  HtmlToTextOptions,
+  MetaData,
+} from '../src/index';
 
 function stableSerialize(value: unknown): string {
   const seen = new WeakSet<object>();
