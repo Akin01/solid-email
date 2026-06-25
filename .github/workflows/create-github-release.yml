@@ -7,6 +7,18 @@ on:
         description: Version to release. Defaults to each package version.
         required: false
         type: string
+      html_to_text_version:
+        description: '@solid-email/html-to-text version to release. Defaults to package.json.'
+        required: false
+        type: string
+      render_version:
+        description: '@solid-email/render version to release. Defaults to package.json.'
+        required: false
+        type: string
+      solid_email_version:
+        description: '@akin01/solid-email version to release. Defaults to package.json.'
+        required: false
+        type: string
       prerelease:
         description: Mark releases as prereleases.
         required: false
@@ -34,12 +46,24 @@ jobs:
       - name: Create package releases
         env:
           GH_TOKEN: ${{ github.token }}
+          HTML_TO_TEXT_VERSION: ${{ inputs.html_to_text_version }}
           INPUT_VERSION: ${{ inputs.version }}
+          RENDER_VERSION: ${{ inputs.render_version }}
+          SOLID_EMAIL_VERSION: ${{ inputs.solid_email_version }}
           PRERELEASE: ${{ inputs.prerelease }}
         run: |
           ARGS=()
           if [ -n "$INPUT_VERSION" ]; then
             ARGS+=(--version "$INPUT_VERSION")
+          fi
+          if [ -n "$HTML_TO_TEXT_VERSION" ]; then
+            ARGS+=(--package-version "@solid-email/html-to-text@$HTML_TO_TEXT_VERSION")
+          fi
+          if [ -n "$RENDER_VERSION" ]; then
+            ARGS+=(--package-version "@solid-email/render@$RENDER_VERSION")
+          fi
+          if [ -n "$SOLID_EMAIL_VERSION" ]; then
+            ARGS+=(--package-version "@akin01/solid-email@$SOLID_EMAIL_VERSION")
           fi
           if [ "$PRERELEASE" = "true" ]; then
             ARGS+=(--prerelease)

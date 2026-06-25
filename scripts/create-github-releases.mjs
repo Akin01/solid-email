@@ -9,11 +9,23 @@ import {
   tagForPackage,
 } from './release-packages.mjs';
 
+function parsePackageVersion(value) {
+  const separator = value.lastIndexOf('@');
+  if (separator <= 0 || separator === value.length - 1) {
+    throw new Error(
+      `Expected --package-version value to look like @scope/name@1.2.3, got ${value}`,
+    );
+  }
+
+  return [value.slice(0, separator), value.slice(separator + 1)];
+}
+
 function parseArgs(argv) {
   const options = {
     dispatchPublish: false,
     dryRun: false,
     prerelease: false,
+    packageVersions: new Map(),
     version: undefined,
   };
 
@@ -35,6 +47,15 @@ function parseArgs(argv) {
       const value = argv[index + 1];
       if (!value) throw new Error('Missing value for --version');
       options.version = value;
+      index += 1;
+      continue;
+    }
+
+    if (arg === '--package-version') {
+      const value = argv[index + 1];
+      if (!value) throw new Error('Missing value for --package-version');
+      const [packageName, version] = parsePackageVersion(value);
+      options.packageVersions.set(packageName, version);
       index += 1;
       continue;
     }
@@ -65,15 +86,20 @@ function assertGhSuccess(result, action) {
 }
 
 const options = parseArgs(process.argv.slice(2));
+const packageVersions = new Map(options.packageVersions);
 const releases = releasePackages.map((packageInfo) => {
   const packageVersion = readPackageVersion(packageInfo);
-  if (options.version && options.version !== packageVersion) {
+  const requestedVersion =
+    packageVersions.get(packageInfo.name) ?? options.version;
+  if (requestedVersion && requestedVersion !== packageVersion) {
     throw new Error(
-      `${packageInfo.name} is version ${packageVersion}, not ${options.version}`,
+      `${packageInfo.name} is version ${packageVersion}, not ${requestedVersion}`,
     );
   }
 
-  const version = options.version ?? packageVersion;
+  packageVersions.delete(packageInfo.name);
+
+  const version = requestedVersion ?? packageVersion;
   return {
     ...packageInfo,
     notes: releaseNotesForPackage(packageInfo.name, version),
@@ -81,6 +107,12 @@ const releases = releasePackages.map((packageInfo) => {
     version,
   };
 });
+
+if (packageVersions.size > 0) {
+  throw new Error(
+    `Unknown release package(s): ${Array.from(packageVersions.keys()).join(', ')}`,
+  );
+}
 
 for (const release of releases) {
   console.log(`${options.dryRun ? 'Would create' : 'Creating'} ${release.tag}`);

@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.1.3 - 2026-06-25
+
+### Added
+
+- Added `@solid-email/html-to-text`, a bundled HTML-to-text converter used by `@solid-email/render`.
+- Added optional precompiled plain-text output via `compile(..., { withPlainText: true })`.
+- Added HTML-to-text benchmarks comparing Solid Email, React Email, `@solid-email/html-to-text`, and the npm `html-to-text` package.
+
+### Changed
+
+- Split compile-time options from compiled render options: compile controls reusable template artifacts, while compiled render chooses HTML or plain-text output.
+- Replaced `@solid-email/render`'s direct `html-to-text` dependency with the workspace `@solid-email/html-to-text` package.
+- Allowed GitHub release creation to validate package-specific versions independently, so `@solid-email/html-to-text` can publish on its own version track.
+- Made the publish workflow run `pnpm publish` from the resolved package directory.
+
+### Related commits
+
+- Package integration
+  - [`93df83631b0a`](https://github.com/Akin01/solid-email/commit/93df83631b0a889e5d2f5386a33b8a2e411458fd) Added the bundled `@solid-email/html-to-text` converter package and wired `@solid-email/render` to use it.
+- Render API
+  - [`6f094fb0d723`](https://github.com/Akin01/solid-email/commit/6f094fb0d723abd5673534dc64c3b18b46520a24) Added precompiled plain-text templates for compiled render output.
+- Shared config
+  - [`80b514990350`](https://github.com/Akin01/solid-email/commit/80b514990350232c099ed99e4ec33a33dec0f369) Reused shared package test configs across benchmarks and e2e projects.
+- Benchmark coverage
+  - [`6e2ea6d31ba6`](https://github.com/Akin01/solid-email/commit/6e2ea6d31ba6c5cf44952f1dbb034afd2acde634) Added HTML-to-text compiled plain-text rendering benchmark coverage.
+
+### Verified
+
+- `pnpm test`
+- `node scripts/create-github-releases.mjs --dry-run`
+- `node scripts/create-github-releases.mjs --dry-run --package-version @solid-email/html-to-text@0.1.1 --package-version @solid-email/render@0.1.3 --package-version @akin01/solid-email@0.1.3`
+- `pnpm publish --dry-run --access public --no-git-checks` from each publishable package directory
+- `pnpm typecheck`
+- `pnpm --filter @benchmarks/html-to-text run typecheck`
+- `BENCH_ITERATIONS=1 pnpm --filter @benchmarks/html-to-text run benchmark`
+
 ## 0.1.2 - 2026-06-21
 
 ### Added

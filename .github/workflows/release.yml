@@ -11,6 +11,7 @@ on:
         required: true
         type: choice
         options:
+          - "@solid-email/html-to-text"
           - "@solid-email/render"
           - "@akin01/solid-email"
       version:
@@ -69,7 +70,8 @@ jobs:
       - name: Run build
         run: pnpm build
 
-      - name: Publish ${{ steps.package.outputs.name }}
-        run: pnpm --dir "${{ steps.package.outputs.directory }}" publish --access public --provenance --no-git-checks
+      - name: Publish ${{ steps.package.outputs.name }} from ${{ steps.package.outputs.directory }}
+        working-directory: ${{ steps.package.outputs.directory }}
+        run: pnpm publish --access public --provenance --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

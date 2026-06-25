@@ -3,6 +3,10 @@ import path from 'node:path';
 
 export const releasePackages = [
   {
+    name: '@solid-email/html-to-text',
+    directory: 'packages/html-to-text',
+  },
+  {
     name: '@solid-email/render',
     directory: 'packages/render',
   },
