@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.1.4 - 2026-06-26
+
+### Changed
+
+- Bumped `@solid-email/render` and `@akin01/solid-email` to `0.1.4` so both publishable packages can be released together after the client-entrypoint fix.
+- Bumped the private monorepo metadata and Solid Email skill metadata to `0.1.4`.
+- Expanded the Solid Email skill docs with the DOM/CSR preview path: import preview-safe components from `@akin01/solid-email/client` and mount them with Solid's DOM `render` from `solid-js/web`.
+- Clarified that `@akin01/solid-email/client` intentionally excludes `render`, `compile`, and `Tailwind`; use `@solid-email/render` or the `@akin01/solid-email` package root for server/email HTML string generation.
+
+### Related commits
+
+- Client entrypoint fix
+  - [`fd6c609f6b6c`](https://github.com/Akin01/solid-email/commit/fd6c609f6b6cb6c25dfe18c68e4cffbcd42b633a) Merged PR #9 for `fix/client-entrypoint-issue-8`.
+  - [`b766a8eb5c40`](https://github.com/Akin01/solid-email/commit/b766a8eb5c40d85170d8f8e46b2608d12c5320c4) Added the DOM client entrypoint.
+
+### Verified
+
+- `pnpm --filter @akin01/solid-email run test -- src/index.spec.tsx`
+- `pnpm --filter @solid-email/render run test -- src/entrypoints.spec.tsx`
+- `pnpm biome check package.json packages/solid-email/package.json packages/render/package.json`
+- `node scripts/create-github-releases.mjs --dry-run --package-version @solid-email/render@0.1.4 --package-version @akin01/solid-email@0.1.4`
+
 ## 0.1.3 - 2026-06-25
 
 ### Added

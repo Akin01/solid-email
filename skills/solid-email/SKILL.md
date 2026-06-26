@@ -4,7 +4,7 @@ description: Use when building, reviewing, testing, or documenting HTML email te
 license: MIT
 metadata:
   author: Ainul Yaqin
-  version: "0.1.3"
+  version: "0.1.4"
   homepage: https://github.com/akin01/solid-email
   source: https://github.com/akin01/solid-email
 ---
@@ -76,6 +76,31 @@ const html = renderSync(() => (
   <WelcomeEmail name="Ainul" actionUrl="https://example.com/start" />
 ));
 ```
+
+## DOM/CSR preview entrypoint
+
+Use `@akin01/solid-email/client` only when mounting email components into the browser DOM for previews. Pair it with Solid's DOM renderer from `solid-js/web`.
+
+```tsx
+import { render as mount } from 'solid-js/web';
+import { Body, Container, Heading, Html, Text } from '@akin01/solid-email/client';
+
+mount(
+  () => (
+    <Html>
+      <Body>
+        <Container>
+          <Heading as="h2">Preview</Heading>
+          <Text>Client preview mounted safely.</Text>
+        </Container>
+      </Body>
+    </Html>
+  ),
+  document.getElementById('root')!,
+);
+```
+
+Do not import `render`, `compile`, or `Tailwind` from the client subpath. Use the package root or `@solid-email/render` for server/email HTML string rendering.
 
 ## Compile for repeated renders
 
