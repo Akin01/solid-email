@@ -8,15 +8,15 @@ on:
         required: false
         type: string
       html_to_text_version:
-        description: '@solid-email/html-to-text version to release. Defaults to package.json.'
+        description: '@solid-email/html-to-text version to release independently.'
         required: false
         type: string
       render_version:
-        description: '@solid-email/render version to release. Defaults to package.json.'
+        description: '@solid-email/render version to release independently.'
         required: false
         type: string
       solid_email_version:
-        description: '@akin01/solid-email version to release. Defaults to package.json.'
+        description: '@akin01/solid-email version to release independently.'
         required: false
         type: string
       prerelease:

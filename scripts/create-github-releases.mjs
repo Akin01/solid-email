@@ -87,7 +87,14 @@ function assertGhSuccess(result, action) {
 
 const options = parseArgs(process.argv.slice(2));
 const packageVersions = new Map(options.packageVersions);
-const releases = releasePackages.map((packageInfo) => {
+const releaseTargets =
+  options.version || packageVersions.size === 0
+    ? releasePackages
+    : releasePackages.filter((packageInfo) =>
+        packageVersions.has(packageInfo.name),
+      );
+
+const releases = releaseTargets.map((packageInfo) => {
   const packageVersion = readPackageVersion(packageInfo);
   const requestedVersion =
     packageVersions.get(packageInfo.name) ?? options.version;

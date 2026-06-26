@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - Bumped the private monorepo metadata and Solid Email skill metadata to `0.1.4`.
 - Expanded the Solid Email skill docs with the DOM/CSR preview path: import preview-safe components from `@akin01/solid-email/client` and mount them with Solid's DOM `render` from `solid-js/web`.
 - Clarified that `@akin01/solid-email/client` intentionally excludes `render`, `compile`, and `Tailwind`; use `@solid-email/render` or the `@akin01/solid-email` package root for server/email HTML string generation.
+- Updated the GitHub release script so package-specific release inputs create only those requested releases instead of also recreating packages that are on independent version tracks.
 
 ### Related commits
 
