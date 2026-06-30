@@ -7,6 +7,7 @@ packages:
   - benchmarks/*
 
 allowBuilds:
+  '@parcel/watcher': true
   esbuild: true
 
 catalog:

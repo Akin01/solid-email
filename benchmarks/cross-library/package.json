@@ -1,0 +1,35 @@
+{
+  "name": "@benchmarks/cross-library",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Cross-library email benchmark: solid-email vs jsx-email vs react-email vs mjml-react",
+  "scripts": {
+    "benchmark": "bash run-benchmark.sh",
+    "typecheck": "tsc --noEmit"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Akin01/solid-email",
+    "directory": "benchmarks/cross-library"
+  },
+  "dependencies": {
+    "@akin01/solid-email": "workspace:*",
+    "@faire/mjml-react": "^4.0.1",
+    "jsx-email": "^3.2.1",
+    "mjml": "^5.3.0",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "react-email": "^6.6.3",
+    "solid-js": "catalog:"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@types/react-dom": "^19.2.3",
+    "tsx": "^4.22.4",
+    "vite": "catalog:",
+    "vite-node": "^6.0.0",
+    "vite-plugin-solid": "catalog:",
+    "vitest": "catalog:"
+  }
+}
