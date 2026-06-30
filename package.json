@@ -20,6 +20,7 @@
     "benchmark:html-to-text": "pnpm --filter @benchmarks/html-to-text run benchmark",
     "benchmark:rendering": "pnpm --filter @benchmarks/rendering run solid-vs-react",
     "benchmark:tailwind": "pnpm --filter @benchmarks/tailwind run with-vs-without",
+    "benchmark:cross-library": "pnpm --filter @benchmarks/cross-library run benchmark",
     "benchmark:ui": "pnpm --filter @benchmarks/ui run benchmark",
     "release:github": "node scripts/create-github-releases.mjs",
     "release:github:dry-run": "node scripts/create-github-releases.mjs --dry-run"

@@ -41,7 +41,8 @@
       "!**/.solid-email",
       "!**/.react-email",
       "!**/out",
-      "!**/coverage"
+      "!**/coverage",
+      "!**/results"
     ]
   }
 }

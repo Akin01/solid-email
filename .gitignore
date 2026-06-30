@@ -34,3 +34,6 @@ packages/*/dist/
 packages/solid-email/src/**/*.d.ts
 !packages/solid-email/src/render-shim.d.ts
 !packages/solid-email/src/types/prismjs-components.d.ts
+
+# Benchmark results (ephemeral output)
+benchmarks/*/results/
