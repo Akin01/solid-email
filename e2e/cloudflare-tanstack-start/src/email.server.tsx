@@ -21,7 +21,7 @@ import {
   xonokai,
 } from '@akin01/solid-email';
 import { compile, render, Slot, slot } from '@solid-email/render';
-import type { JSX } from 'solid-js';
+import type { JSX } from '@solidjs/web';
 
 type WorkerEmailSlots = {
   ctaUrl: string;

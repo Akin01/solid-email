@@ -1,6 +1,6 @@
 import type { ChildProcess, ExecFileException } from 'node:child_process';
 import { execFile, spawn } from 'node:child_process';
-import { mkdir, readFile, rm } from 'node:fs/promises';
+import { readFile, rm } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -10,7 +10,6 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 const execFileAsync = promisify(execFile);
 const root = path.resolve(new URL('..', import.meta.url).pathname);
 const e2eRoot = path.join(root, 'e2e');
-const packDir = path.join(e2eRoot, '.tmp', 'packs');
 
 type RenderExportCase = {
   conditions: readonly string[];
@@ -126,7 +125,7 @@ function finishSmoke(resolved) {
 const renderImportProbe = `${renderExportSmoke}
 const resolved = import.meta.resolve('@solid-email/render');
 const mod = await import('@solid-email/render');
-const { ssr } = await import('solid-js/web/dist/server.js');
+const { ssr } = mod;
 await smokeRenderExport(mod, ssr);
 finishSmoke(resolved);`;
 
@@ -134,7 +133,7 @@ const renderRequireProbe = `${renderExportSmoke}
 (async () => {
   const resolved = require.resolve('@solid-email/render');
   const mod = require('@solid-email/render');
-  const { ssr } = require('solid-js/web/dist/server.cjs');
+  const { ssr } = mod;
   await smokeRenderExport(mod, ssr);
   finishSmoke(resolved);
 })().catch((error) => {
@@ -205,7 +204,7 @@ for (const name of ['Container', 'Heading', 'Text', 'Preview']) {
   }
 }
 
-const { render: mount } = await import('solid-js/web');
+const { render: mount } = await import('@solidjs/web');
 const root = document.getElementById('root');
 const dispose = mount(
   () =>
@@ -296,10 +295,6 @@ type PreviewServer = {
 
 async function cleanFixture(fixture: FixtureName): Promise<void> {
   const fixtureRoot = path.join(e2eRoot, fixture);
-  await rm(path.join(fixtureRoot, 'node_modules'), {
-    recursive: true,
-    force: true,
-  });
   await rm(path.join(fixtureRoot, 'dist'), { recursive: true, force: true });
   await rm(path.join(fixtureRoot, '.types'), { recursive: true, force: true });
   await rm(path.join(fixtureRoot, '.render'), { recursive: true, force: true });
@@ -335,41 +330,16 @@ async function runPnpm(args: string[], cwd = root): Promise<string> {
   }
 }
 
-async function preparePackedPackages(): Promise<void> {
-  await rm(path.join(e2eRoot, '.tmp'), { recursive: true, force: true });
-  await mkdir(packDir, { recursive: true });
-
+async function prepareWorkspacePackages(): Promise<void> {
   await runPnpm(['--filter', '@solid-email/html-to-text', 'run', 'build']);
   await runPnpm(['--filter', '@solid-email/render', 'run', 'build']);
   await runPnpm(['--filter', '@akin01/solid-email', 'run', 'build']);
-  await runPnpm([
-    '--filter',
-    '@solid-email/html-to-text',
-    'pack',
-    '--pack-destination',
-    packDir,
-  ]);
-  await runPnpm([
-    '--filter',
-    '@solid-email/render',
-    'pack',
-    '--pack-destination',
-    packDir,
-  ]);
-  await runPnpm([
-    '--filter',
-    '@akin01/solid-email',
-    'pack',
-    '--pack-destination',
-    packDir,
-  ]);
 }
 
 async function installAndBuildFixture(fixture: FixtureName) {
   const fixtureRoot = path.join(e2eRoot, fixture);
   await cleanFixture(fixture);
 
-  await runPnpm(['install', '--no-lockfile'], fixtureRoot);
   await runPnpm(['run', 'build'], fixtureRoot);
   await runPnpm(['exec', 'tsc', '--noEmit'], fixtureRoot);
   await runPnpm(
@@ -526,7 +496,7 @@ function expectAllComponentsHtml(html: string, label: string): void {
 }
 
 beforeAll(async () => {
-  await preparePackedPackages();
+  await prepareWorkspacePackages();
 });
 
 afterAll(async () => {

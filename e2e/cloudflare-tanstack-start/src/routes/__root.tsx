@@ -1,11 +1,12 @@
+import type { JSX } from '@solidjs/web';
+import { HydrationScript } from '@solidjs/web';
 import {
   createRootRoute,
   HeadContent,
   Outlet,
   Scripts,
 } from '@tanstack/solid-router';
-import { type JSX, Suspense } from 'solid-js';
-import { HydrationScript } from 'solid-js/web';
+import { Loading } from 'solid-js';
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -27,7 +28,7 @@ function RootDocument(props: Readonly<{ children: JSX.Element }>): JSX.Element {
       </head>
       <body>
         <HeadContent />
-        <Suspense>{props.children}</Suspense>
+        <Loading>{props.children}</Loading>
         <Scripts />
       </body>
     </html>
