@@ -2,7 +2,60 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## 2.0.0-beta - 2026-10-02
+
+### Breaking Changes
+
+- Migrated to SolidJS v2.0 (`solid-js@^2.0.0-rc.0` and `@solidjs/web@^2.0.0-rc.0`).
+- Switched JSX runtime and types to `@solidjs/web` across all packages (`jsxImportSource: "@solidjs/web"`).
+- Replaced internal `renderToStringAsync` with `renderToStream` from `@solidjs/web`.
+- Replaced `createResource` and `Suspense` in `Tailwind` with `createMemo` and `Loading` from `solid-js`.
+- Replaced `splitProps` with `omit` across components.
+- Removed legacy `attr:` namespace prefix on HTML attributes in table primitives in favor of standard HTML attributes (`align`, `width`, `border`, `cellpadding`, `cellspacing`).
+- Replaced `vite-plugin-solid` with `@solidjs/vite-plugin`.
+- Bumped minimum Node engine requirement to `>=22.12.0` in alignment with SolidJS v2.
+
+### Added
+
+- Added bounded LRU and WeakMap compilation caching for `@solid-email/html-to-text` `convert()`, achieving nearly 20x faster repeated text conversions.
+- Added selector decision tree caching for Selderee AST parsing.
+- Added a 64KB `Uint8Array` character lookup table for O(1) whitespace classification.
+- Added tag-level memoization (`tagCache`) to `TailwindRenderPlan` for O(1) repeated element inlining.
+- Added direct SSR `{ t: string }` template extraction (`extractSsrHtml`) for slot rendering to bypass redundant `renderToString` root creation.
+- Added `resolveContentSlotName` for case-insensitive slot matching under uppercase text transformations (e.g., headings).
+
+### Changed
+
+- Bumped `@akin01/solid-email`, `@solid-email/render`, and `@solid-email/html-to-text` to `2.0.0-beta`.
+- Bumped private monorepo metadata and Solid Email skill metadata to `2.0.0-beta`.
+- Updated all benchmark suites and E2E integration fixtures (Vite, TanStack Start, Cloudflare TanStack Start) to SolidJS v2.0.
+- Replaced dynamic regex compilation in Tailwind attribute handling with static pre-compiled regexes.
+- Added `noScripts: true` to `solidRenderOptions` for synchronous and streaming SSR.
+
+### Related commits
+
+- SolidJS v2.0 migration
+  - [`d00b107`](https://github.com/Akin01/solid-email/commit/d00b107) `feat: migrate core workspace to SolidJS v2.0`
+- Integration and benchmark updates
+  - [`696635a`](https://github.com/Akin01/solid-email/commit/696635a) `feat(e2e): update integration fixtures for SolidJS v2.0`
+  - [`f060b0e`](https://github.com/Akin01/solid-email/commit/f060b0e) `feat(benchmarks): update benchmark suites and templates for SolidJS v2.0`
+- Performance optimizations
+  - [`3718db6`](https://github.com/Akin01/solid-email/commit/3718db6) `perf(html-to-text): optimize compilation memoization, whitespace classification, and text builder`
+  - [`75d9ab2`](https://github.com/Akin01/solid-email/commit/75d9ab2) `perf(render,solid-email): optimize slot replacement, template parsing, and tailwind inlining`
+
+- Release and documentation
+  - [`7bde2cd`](https://github.com/Akin01/solid-email/commit/7bde2cd) `release: bump version to 2.0.0-beta and update changelog and benchmarks documentation`
+
+### Verified
+
+- `pnpm build`
+- `pnpm test`
+- `pnpm typecheck`
+- `pnpm lint`
+- `pnpm benchmark:rendering`
+- `pnpm benchmark:cross-library`
+- `pnpm benchmark:tailwind`
+- `pnpm benchmark:html-to-text`
 
 ## 0.1.5 - 2026-07-05
 

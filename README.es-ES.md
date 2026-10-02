@@ -33,58 +33,58 @@ Solid Email mantiene la experiencia de creación cercana a una aplicación Solid
 
 Medido con `pnpm benchmark:rendering` en el fixture de correo de marketing del repositorio. Un tiempo promedio menor es mejor.
 
-| Renderizador | Plantilla | Promedio | Tasa | Comparación |
-| --- | --- | ---: | ---: | --- |
-| Solid Email `render()` | JSX estático | 2.2919ms | 436.33 hz | 5.02x más rápido que React Email `render()` |
-| Solid Email `renderSync()` | JSX estático | 1.8935ms | 528.13 hz | 6.08x más rápido que React Email `render()` |
-| Solid Email `render()` | JSX con Tailwind | 3.1230ms | 320.20 hz | 5.69x más rápido que React Email Tailwind |
-| Solid Email `compileSync` render (en caché) | JSX estático | **0.0438ms** | **22,842 hz** | 263x más rápido que React Email `render()` |
-| Solid Email `compile` render (en caché) | JSX estático | 0.0858ms | 11,661 hz | 134x más rápido que React Email `render()` |
-| Solid Email `compile` render (en caché) | JSX con Tailwind | 0.0452ms | 22,145 hz | **393x más rápido que React Email Tailwind** |
-| React Email `render()` | JSX estático | 11.5084ms | 86.89 hz | Línea base |
-| React Email `render()` | JSX con Tailwind | 17.7760ms | 56.26 hz | Línea base Tailwind |
+| Renderizador | Plantilla | Promedio v1 | Promedio v2 | Tasa v2 | Comparación (vs React Email) |
+| --- | --- | ---: | ---: | ---: | --- |
+| Solid Email `compileSync` (en caché) | JSX estático | 0.0438ms | **0.0386ms** | **25,927 hz** | **294x más rápido** |
+| Solid Email `compile` Tailwind (en caché) | JSX con Tailwind | 0.0452ms | **0.0506ms** | **19,773 hz** | **385x más rápido** |
+| Solid Email `compile` (en caché) | JSX estático | 0.0858ms | **0.0520ms** | **19,240 hz** | **218x más rápido** |
+| Solid Email `renderSync()` | JSX estático | 1.8935ms | **1.2689ms** | **788.08 hz** | **8.95x más rápido** |
+| Solid Email `render()` | JSX estático | 2.2919ms | **1.9760ms** | **506.06 hz** | **5.75x más rápido** |
+| Solid Email `render()` | JSX con Tailwind | 3.1230ms | **2.4926ms** | **401.19 hz** | **7.82x más rápido** |
+| React Email `render()` | JSX estático | 11.5084ms | 10.2234ms | 97.81 hz | Línea base |
+| React Email `render()` | JSX con Tailwind | 17.7760ms | 16.8971ms | 59.18 hz | Línea base Tailwind |
 
 **En caché** significa que la plantilla se compila una vez y solo se mide la etapa de renderizado. Este es el uso esperado en producción: compilar al cargar el módulo y renderizar por solicitud. El costo de compilación+renderizado de "una sola vez" es comparable a llamar a `render()` directamente.
 
 Benchmarks de texto plano medidos con `pnpm benchmark:html-to-text` en los fixtures de HTML a texto del repositorio. Un tiempo promedio menor es mejor.
 
-| Operación | Fixture | Promedio | Tasa | Comparación |
-| --- | --- | ---: | ---: | --- |
-| `@solid-email/render` `toPlainText` | Fixtures HTML | 2.4369ms | 410.36 hz | 3.40x más rápido que React Email `toPlainText` |
-| `@solid-email/render` plantilla de texto compilada | Solid JSX | **1.4434ms** | **692.83 hz** | **8.61x más rápido que React Email renderizado de texto plano** |
-| `@solid-email/render` `renderSync` texto plano sin compilar | Solid JSX | 2.8895ms | 346.09 hz | 4.30x más rápido que React Email renderizado de texto plano |
-| `@solid-email/html-to-text` `convert` | Fixtures HTML | 3.9657ms | 252.16 hz | Convertidor directo del paquete |
-| `html-to-text` `convert` | Fixtures HTML | 3.8166ms | 262.01 hz | Línea base del convertidor directo |
-| React Email `toPlainText` | Fixtures HTML | 8.2867ms | 120.67 hz | Línea base de conversión de texto de React |
-| React Email `render` texto plano | React JSX | 12.4310ms | 80.44 hz | Línea base de renderizado de texto plano de React |
+| Operación | Fixture | Promedio v1 | Promedio v2 | Tasa v2 | Comparación (vs React Email) |
+| --- | --- | ---: | ---: | ---: | --- |
+| `@solid-email/render` `toPlainText` | Fixtures HTML | 2.4369ms | **1.7383ms** | **575.29 hz** | **3.58x más rápido** |
+| `@solid-email/render` plantilla de texto compilada | Solid JSX | 1.4434ms | **0.2913ms** | **3,432.87 hz** | **189x más rápido** |
+| `@solid-email/render` `renderSync` texto plano | Solid JSX | 2.8895ms | **3.3323ms** | **300.10 hz** | **3.48x más rápido** |
+| `@solid-email/html-to-text` `convert` | Fixtures HTML | 3.9657ms | **1.6586ms** | **602.91 hz** | **5.56x más rápido** |
+| `html-to-text` `convert` | Fixtures HTML | 3.8166ms | 3.6168ms | 276.48 hz | Línea base del convertidor directo |
+| React Email `toPlainText` | Fixtures HTML | 8.2867ms | 6.2313ms | 160.48 hz | Línea base de conversión de texto de React |
+| React Email `render` texto plano | React JSX | 12.4310ms | 10.7571ms | 92.96 hz | Línea base de renderizado de texto plano de React |
 
 Benchmarks entre librerías medidos con `pnpm benchmark:cross-library` en la plantilla de correo de marketing, utilizando 50 iteraciones × 10 ejecuciones después de 3 ejecuciones de calentamiento. Un tiempo promedio menor es mejor.
 
-| Librería / modo | Promedio | Mín | Máx | Ops/s | Salida | Heap Δ | Conformidad | vs React Email |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| Solid Email `renderSync` | 1.17ms | 764µs | 1.47ms | 853 | 22.6 KB | **<0.01 MB** | 100% | 1.5x más rápido |
-| Solid Email `compileSync` render (en caché) | **12µs** | **9µs** | **15µs** | **83,483** | 23.4 KB | **<0.01 MB** | 100% | **148.4x más rápido** |
-| JSX Email `render` | 3.82ms | 3.25ms | 5.45ms | 262 | **18.2 KB** | 1.15 MB | 100% | 2.1x más lento |
-| React Email `render` | 1.78ms | 1.37ms | 4.00ms | 563 | 22.5 KB | 26.36 MB | 100% | Línea base |
-| MJML React `render` | 11.01ms | 9.39ms | 14.74ms | 91 | 75.5 KB | 1.57 MB | 100% | 6.2x más lento |
+| Librería / modo | Avg v1 | Avg v2 | Mín | Máx | Ops/s | Salida | Heap Δ | Conformidad | vs React Email |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| Solid Email `compileSync` (en caché) | 12µs | **20µs** | **17µs** | **27µs** | **49,108** | 23.2 KB | **0.50 MB** | 100% | **125.8x más rápido** |
+| Solid Email `renderSync` | 1.17ms | **645µs** | **501µs** | **897µs** | **1,551** | 22.4 KB | **0.56 MB** | 100% | **4.0x más rápido** |
+| React Email `render` | 1.78ms | 3.31ms | 1.84ms | 7.99ms | 302 | 22.3 KB | 26.51 MB | 100% | Línea base |
+| JSX Email `render` | 3.82ms | 5.13ms | 4.43ms | 7.18ms | 195 | **18.2 KB** | 1.38 MB | 100% | 1.5x más lento |
+| MJML React `render` | 11.01ms | 11.84ms | 10.16ms | 14.80ms | 84 | 75.5 KB | 1.65 MB | 100% | 3.6x más lento |
 
 Todos los resultados entre librerías alcanzaron el 100% de conformidad por pares contra las verificaciones compartidas de la plantilla de correo.
 
 El tamaño del paquete compara los archivos de entrada ESM construidos después de `pnpm build`; gzip utiliza `zlib.gzipSync` de Node.
 
-| Entrada del paquete | Tamaño sin comprimir | Tamaño gzip | Comparación |
+| Entrada del paquete | v1 Sin comp. (Gzip) | v2 Sin comp. (Gzip) | Comparación |
 | --- | ---: | ---: | --- |
-| `@akin01/solid-email/dist/index.mjs` | 199.0 KiB | 42.7 KiB | Componentes de servidor/raíz y re-exportaciones de utilidad de renderizado |
-| `@akin01/solid-email/dist/client/index.mjs` | 105.9 KiB | 19.5 KiB | Compilación de vista previa DOM condicional para navegador |
-| `@solid-email/render/dist/node/index.mjs` | **26.3 KiB** | **6.2 KiB** | Entrada del renderizador |
-| Entradas de servidor de Solid Email | 225.3 KiB | 48.9 KiB | **6.4x más pequeño sin comprimir / 7.1x más pequeño en gzip que React Email** |
-| Todas las entradas ESM condicionales de Solid Email | 331.2 KiB | 68.4 KiB | 4.4x más pequeño sin comprimir / 5.1x más pequeño en gzip que React Email |
-| `react-email/dist/index.mjs` | 1,448.0 KiB | 348.6 KiB | Línea base de React Email |
+| `@solid-email/render/dist/node/index.mjs` | 26.3 KiB (6.2 KiB) | **26.7 KiB (6.2 KiB)** | Entrada dedicada del renderizador para node/servidor |
+| `@akin01/solid-email/dist/client/index.mjs` | 105.9 KiB (19.5 KiB) | 106.3 KiB (19.5 KiB) | Compilación de vista previa DOM condicional para navegador |
+| `@akin01/solid-email/dist/index.mjs` | 199.0 KiB (42.7 KiB) | 203.0 KiB (43.3 KiB) | Componentes de servidor/raíz y re-exportaciones de utilidad de renderizado |
+| `@solid-email/render/dist/browser/index.mjs` | — | 197.4 KiB (45.2 KiB) | Entrada del renderizador autónomo para navegador (nuevo en v2) |
+| Entradas de servidor de Solid Email | 225.3 KiB (48.9 KiB) | 229.7 KiB (49.5 KiB) | **4.8x más pequeño sin comprimir / 6.8x más pequeño en gzip que React Email** |
+| Total de distribución `react-email` | 1,448.0 KiB (348.6 KiB) | 1,110.0 KiB (334.7 KiB) | Línea base de React Email |
 
 ## Instalación
 
 ```sh
-pnpm add @akin01/solid-email @solid-email/render solid-js
+pnpm add @akin01/solid-email @solid-email/render solid-js @solidjs/web
 ```
 
 ## Primeros pasos
@@ -378,5 +378,5 @@ pnpm lint
 ---
 
 <div align="center">
-  Construido con ❤️, Licencia MIT.
+  Construido con ❤️ Licencia MIT.
 </div>

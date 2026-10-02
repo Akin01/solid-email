@@ -13,7 +13,7 @@ const html = await render(() => (
 ));
 ```
 
-Use `render()` by default. It supports async Solid rendering and Suspense waiting.
+Use `render()` by default. It supports async Solid rendering and Loading boundary waiting.
 
 ## DOM/CSR preview mounting
 
@@ -23,7 +23,7 @@ DOM-safe Solid DOM build, which intentionally excludes `render`, `compile`, and
 `Tailwind`.
 
 ```tsx
-import { render as mount } from 'solid-js/web';
+import { render as mount } from '@solidjs/web';
 import { Body, Container, Heading, Html, Text } from '@akin01/solid-email';
 
 mount(

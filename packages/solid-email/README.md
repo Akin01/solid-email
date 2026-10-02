@@ -5,7 +5,7 @@ High-quality SolidJS components for building HTML email templates.
 ## Install
 
 ```sh
-pnpm add @akin01/solid-email @solid-email/render solid-js
+pnpm add @akin01/solid-email @solid-email/render solid-js @solidjs/web
 ```
 
 ## Example

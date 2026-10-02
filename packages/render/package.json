@@ -1,6 +1,6 @@
 {
   "name": "@solid-email/render",
-  "version": "0.1.5",
+  "version": "2.0.0-beta",
   "description": "Transform Solid components into HTML email templates",
   "repository": {
     "type": "git",
@@ -105,6 +105,7 @@
     "build": "tsdown",
     "build:watch": "tsdown --watch",
     "clean": "rm -rf dist",
+    "format": "biome format --write .",
     "test": "vitest run",
     "test:e2e": "vitest run --config vitest.e2e.config.ts",
     "test:watch": "vitest",
@@ -115,13 +116,15 @@
     "prettier": "catalog:"
   },
   "peerDependencies": {
+    "@solidjs/web": "catalog:",
     "solid-js": "catalog:"
   },
   "devDependencies": {
+    "@solidjs/vite-plugin": "catalog:",
+    "@solidjs/web": "catalog:",
     "solid-js": "catalog:",
     "tsconfig": "workspace:*",
     "tsdown": "catalog:",
-    "vite-plugin-solid": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

@@ -1,19 +1,21 @@
 {
   "name": "solid-email-monorepo",
-  "version": "0.1.5",
+  "version": "2.0.0-beta",
   "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/Akin01/solid-email"
   },
   "type": "module",
-  "packageManager": "pnpm@11.8.0",
+  "packageManager": "pnpm@12.1.0",
   "scripts": {
     "build": "pnpm --filter @solid-email/html-to-text --filter @solid-email/render --filter @akin01/solid-email run build",
     "test": "pnpm --filter @solid-email/html-to-text --filter @solid-email/render --filter @akin01/solid-email run test",
     "test:e2e": "vitest run --config e2e/vitest.config.ts",
     "typecheck": "pnpm --filter @solid-email/html-to-text --filter @solid-email/render run build && pnpm --filter @solid-email/html-to-text --filter @solid-email/render --filter @akin01/solid-email run typecheck && pnpm typecheck:e2e",
     "typecheck:e2e": "tsc -p e2e/tsconfig.json --noEmit",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "benchmark": "pnpm -r --filter './benchmarks/*' run benchmark",
@@ -29,6 +31,7 @@
     "@akin01/solid-email": "workspace:*",
     "@biomejs/biome": "catalog:",
     "@solid-email/render": "workspace:*",
+    "@solidjs/web": "catalog:",
     "@types/node": "catalog:",
     "jsdom": "catalog:",
     "solid-js": "catalog:",

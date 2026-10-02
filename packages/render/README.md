@@ -5,7 +5,7 @@ Render SolidJS email templates to HTML or plain text, and compile templates for 
 ## Install
 
 ```sh
-pnpm add @solid-email/render solid-js
+pnpm add @solid-email/render solid-js @solidjs/web
 ```
 
 Install `@akin01/solid-email` when using the Solid Email component set.
