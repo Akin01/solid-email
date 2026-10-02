@@ -1,4 +1,4 @@
-import { splitProps } from 'solid-js';
+import { omit } from 'solid-js';
 import {
   cls,
   type IntrinsicProps,
@@ -14,15 +14,9 @@ export type CodeInlineProps = Readonly<
   IntrinsicProps<'code'> & IntrinsicProps<'span'>
 >;
 export function CodeInline(props: CodeInlineProps) {
-  const [local, rest] = splitProps(props, [
-    'children',
-    'class',
-    'className',
-    'ref',
-    'style',
-  ]);
-  const classValue = cls(local);
-  const style = normalizeStyle(local.style);
+  const rest = omit(props, 'children', 'class', 'className', 'ref', 'style');
+  const classValue = cls(props);
+  const style = normalizeStyle(props.style);
   return (
     <>
       {/*
@@ -40,24 +34,24 @@ export function CodeInline(props: CodeInlineProps) {
         class={classValue ? `${classValue} cino` : 'cino'}
         {...(style ? { style } : {})}
       >
-        {local.children}
+        {props.children}
       </code>
       {/* Renders only on Orange.fr. */}
       <span
         {...withoutClass(rest)}
         class={classValue ? `${classValue} cio` : 'cio'}
         ref={
-          local.ref as
+          props.ref as
             | HTMLSpanElement
             | ((element: HTMLSpanElement) => void)
             | undefined
         }
         style={normalizeStyle({
           display: 'none',
-          ...styleObject(local.style),
+          ...styleObject(props.style),
         })}
       >
-        {local.children}
+        {props.children}
       </span>
     </>
   );

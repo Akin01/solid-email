@@ -1,5 +1,5 @@
-import { splitProps } from 'solid-js';
-import { Dynamic } from 'solid-js/web/dist/server.js';
+import { dynamic } from '@solidjs/web';
+import { omit } from 'solid-js';
 import {
   cls,
   type IntrinsicProps,
@@ -14,7 +14,8 @@ export type HeadingAs = As<'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'>;
 export type HeadingProps = Readonly<IntrinsicProps<'h1'> & HeadingAs & Margin>;
 
 export function Heading(props: HeadingProps) {
-  const [local, rest] = splitProps(props, [
+  const rest = omit(
+    props,
     'as',
     'children',
     'style',
@@ -27,18 +28,18 @@ export function Heading(props: HeadingProps) {
     'ml',
     'class',
     'className',
-  ]);
+  );
+  const Tag = dynamic(() => props.as ?? 'h1');
   return (
-    <Dynamic
-      component={local.as ?? 'h1'}
+    <Tag
       {...withoutClass(rest)}
-      class={cls(local)}
+      class={cls(props)}
       style={normalizeStyle({
-        ...withMargin(local),
-        ...styleObject(local.style),
+        ...withMargin(props),
+        ...styleObject(props.style),
       })}
     >
-      {local.children}
-    </Dynamic>
+      {props.children}
+    </Tag>
   );
 }

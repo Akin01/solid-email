@@ -33,8 +33,8 @@ describe('Column', () => {
   it('normalizes className, camel-case styles, and native attributes without leaking compatibility props', async () => {
     const html = await render(() => (
       <Column
-        attr:align="right"
-        attr:valign="top"
+        align="right"
+        valign="top"
         className="compat-col"
         style={{ backgroundColor: '#ddd', maxWidth: 200 }}
       >

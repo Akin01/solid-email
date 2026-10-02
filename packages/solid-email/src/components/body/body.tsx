@@ -44,12 +44,12 @@ export function Body(props: BodyProps) {
       {...(bodyHtmlStyle ? { style: bodyHtmlStyle } : {})}
     >
       <table
-        attr:border={0}
-        attr:width="100%"
-        attr:cellpadding="0"
-        attr:cellspacing="0"
+        border={0}
+        width="100%"
+        cellpadding="0"
+        cellspacing="0"
         role="presentation"
-        attr:align="center"
+        align="center"
       >
         <tbody>
           <tr>

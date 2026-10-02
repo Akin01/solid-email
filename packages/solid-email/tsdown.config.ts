@@ -1,15 +1,12 @@
+import solid, {
+  type Options as SolidPluginOptions,
+} from '@solidjs/vite-plugin';
 import { defineConfig, type UserConfig } from 'tsdown';
-import solid, { type Options as SolidPluginOptions } from 'vite-plugin-solid';
 
 const base: Pick<UserConfig, 'deps' | 'dts' | 'fixedExtension' | 'format'> = {
   dts: true,
   deps: {
-    neverBundle: [
-      'solid-js',
-      'solid-js/web',
-      'solid-js/web/dist/server.js',
-      '@solid-email/render',
-    ],
+    neverBundle: ['solid-js', '@solidjs/web', '@solid-email/render'],
   },
   format: ['cjs', 'esm'],
   fixedExtension: true,
@@ -36,12 +33,12 @@ export default defineConfig([
     outDir: './dist',
     platform: 'browser',
     plugins: [
-      solid({
+      ...solid({
         solid: {
           ...emailSolidCompilerOptions,
           generate: 'ssr',
           hydratable: false,
-          moduleName: 'solid-js/web/dist/server.js',
+          moduleName: '@solidjs/web',
         },
       }),
     ],
@@ -55,7 +52,7 @@ export default defineConfig([
     outDir: './dist/client',
     platform: 'browser',
     plugins: [
-      solid({
+      ...solid({
         solid: {
           ...emailSolidCompilerOptions,
           generate: 'dom',

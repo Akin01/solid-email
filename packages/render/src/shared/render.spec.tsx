@@ -1,4 +1,5 @@
-import { createResource, type JSX, Suspense } from 'solid-js';
+import type { JSX } from '@solidjs/web';
+import { createMemo, Loading } from 'solid-js';
 import { describe, expect, it } from 'vitest';
 import { render, renderSync } from './render';
 import { pretty } from './utils/pretty';
@@ -12,7 +13,7 @@ function Throwing(): JSX.Element {
 }
 
 function AsyncGreeting() {
-  const [greeting] = createResource(() => wait('Hello async'));
+  const greeting = createMemo(() => wait('Hello async'));
   return <span>{greeting()}</span>;
 }
 
@@ -143,13 +144,13 @@ describe('render', () => {
 
   it('awaits async Solid SSR content', async () => {
     const html = await render(() => (
-      <Suspense fallback={<span>loading</span>}>
+      <Loading fallback={<span>loading</span>}>
         <AsyncGreeting />
-      </Suspense>
+      </Loading>
     ));
     expect(html).toContain('Hello async');
     expect(html).not.toContain('loading');
-    expect(html).not.toContain('<script>self.$R=');
+    expect(html).not.toContain('<script');
   });
 
   it('keeps multibyte text intact', async () => {
@@ -181,15 +182,15 @@ describe('render', () => {
 
     expect(html).toContain('Large Email Test');
     expect(html).toContain('This is paragraph 99');
-    expect(html).not.toContain('<script>self.$R=');
+    expect(html).not.toContain('<script');
   });
 
   it('rejects async Solid SSR resource errors', async () => {
     function AsyncError(): JSX.Element {
-      const [value] = createResource(async () => {
+      const value = createMemo(async () => {
         throw new Error('async boom');
       });
-      return <Suspense>{value()}</Suspense>;
+      return <Loading>{value()}</Loading>;
     }
 
     await expect(render(() => <AsyncError />)).rejects.toThrow('async boom');
@@ -197,10 +198,10 @@ describe('render', () => {
 
   it('rejects serialized async resource errors with escaped characters intact', async () => {
     function AsyncEscapedError(): JSX.Element {
-      const [value] = createResource(async () => {
+      const value = createMemo(async () => {
         throw new Error('async "boom" 情報Ⅰ');
       });
-      return <Suspense>{value()}</Suspense>;
+      return <Loading>{value()}</Loading>;
     }
 
     await expect(render(() => <AsyncEscapedError />)).rejects.toThrow(
@@ -245,11 +246,11 @@ describe('renderSync', () => {
     expect(() => renderSync(() => <Throwing />)).toThrow('boom');
   });
 
-  it('does not wait for async Suspense content', () => {
+  it('does not wait for async Loading content', () => {
     const html = renderSync(() => (
-      <Suspense fallback={<span>loading sync</span>}>
+      <Loading fallback={<span>loading sync</span>}>
         <AsyncGreeting />
-      </Suspense>
+      </Loading>
     ));
 
     expect(html).toContain('loading sync');

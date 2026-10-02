@@ -1,10 +1,21 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from '@solidjs/web';
 
-// Solid's JSX types omit a few legacy table/email attributes that still need
-// to serialize as native HTML attributes.
-declare module 'solid-js' {
+// Solid's JSX types omit deprecated HTML4 presentational attributes because
+// modern web standards replaced them with CSS. However, HTML emails strictly
+// require these legacy attributes:
+// - Microsoft Outlook (Word rendering engine) ignores modern table CSS like
+//   `border-spacing: 0` and `margin: 0 auto`. Without `cellpadding="0"`,
+//   `cellspacing="0"`, and `align="center"`, tables render with default cell
+//   spacing, unwanted borders, and incorrect alignment.
+// - Various webmail clients (Yahoo, AOL, older webmail) strip or alter inline
+//   styles and `<style>` tags during sanitization, but preserve native HTML
+//   table attributes.
+//
+// Augmenting `@solidjs/web` ensures these attributes are fully type-safe in JSX
+// and serialize as native HTML attributes in Solid SSR output.
+declare module '@solidjs/web' {
   namespace JSX {
-    interface ExplicitAttributes {
+    interface HTMLAttributes<T> {
       align?: string | undefined;
       border?: number | string | undefined;
       cellpadding?: number | string | undefined;

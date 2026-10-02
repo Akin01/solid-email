@@ -17,11 +17,11 @@ export function Section(props: SectionProps) {
   const classValue = cls(props);
   return (
     <table
-      attr:align="center"
-      attr:width="100%"
-      attr:border={0}
-      attr:cellpadding="0"
-      attr:cellspacing="0"
+      align="center"
+      width="100%"
+      border={0}
+      cellpadding="0"
+      cellspacing="0"
       role="presentation"
       {...withoutClass(props)}
       {...(classValue ? { class: classValue } : {})}

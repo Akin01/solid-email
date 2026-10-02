@@ -1,4 +1,4 @@
-import solid from 'vite-plugin-solid';
+import solid from '@solidjs/vite-plugin';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
@@ -12,6 +12,7 @@ export default defineConfig({
     },
   },
   test: {
+    environment: 'node',
     globals: true,
   },
 });

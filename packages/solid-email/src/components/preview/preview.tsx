@@ -1,4 +1,4 @@
-import { splitProps } from 'solid-js';
+import { omit } from 'solid-js';
 import {
   cls,
   type IntrinsicProps,
@@ -28,22 +28,23 @@ export function renderWhiteSpace(text: string) {
 }
 
 export function Preview(props: PreviewProps) {
-  const [local, rest] = splitProps(props, [
+  const rest = omit(
+    props,
     'children',
     'class',
     'className',
     'style',
     'useTitleTag',
-  ]);
+  );
   const text = (
-    Array.isArray(local.children) ? local.children.join('') : local.children
+    Array.isArray(props.children) ? props.children.join('') : props.children
   ).substring(0, PREVIEW_MAX_LENGTH);
   return (
     <>
-      {local.useTitleTag === false ? null : <title>{text}</title>}
+      {props.useTitleTag === false ? null : <title>{text}</title>}
       <div
         {...rest}
-        {...(cls(local) ? { class: cls(local) } : {})}
+        {...(cls(props) ? { class: cls(props) } : {})}
         style={normalizeStyle({
           display: 'none',
           overflow: 'hidden',
@@ -51,7 +52,7 @@ export function Preview(props: PreviewProps) {
           opacity: 0,
           'max-height': 0,
           'max-width': 0,
-          ...styleObject(local.style),
+          ...styleObject(props.style),
         })}
         data-skip-in-text="true"
       >

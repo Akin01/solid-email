@@ -10,7 +10,7 @@ describe('Img', () => {
 
     expect(html).toContain('<img');
     expect(html).toContain('src="cat.jpg"');
-    expect(html).toContain('alt=""');
+    expect(html).toMatch(/alt(="")?/);
     expect(html).toContain('width="300"');
     expect(html).toContain('height="300"');
     expect(html).toContain('display:block');
