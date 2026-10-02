@@ -196,15 +196,58 @@ const DEFAULT_OPTIONS = {
   wordwrap: 80,
 } satisfies CompiledHtmlToTextOptions;
 
+const defaultMergedOptions = composeOptions({
+  defaultOptions: DEFAULT_OPTIONS,
+  genericFormatters: genericFormatters,
+  packageFormatters: textFormatters,
+  userOptions: {},
+}) as CompiledHtmlToTextOptions;
+
+const defaultCompiledFunction = compile_(
+  defaultMergedOptions,
+) as CompiledFunction;
+
+const COMPILE_CACHE_LIMIT = 256;
+const compileOptionsCache = new Map<string, CompiledFunction>();
+const compileWeakCache = new WeakMap<object, CompiledFunction>();
+
+function getOptionsCacheKey(options: HtmlToTextOptions): string {
+  try {
+    return JSON.stringify(options, (_key, val) =>
+      typeof val === 'function' ? val.toString() : val,
+    );
+  } catch {
+    return '';
+  }
+}
+
 /**
  * Preprocess options, compile selectors into a decision tree,
  * return a function intended for batch processing.
  *
  * @param   { Options } [options]   HtmlToText options.
- * @returns { (html: string, metadata?: any) => string } Pre-configured converter function.
+ * @returns { (html: string, metadata?: unknown) => string } Pre-configured converter function.
  * @static
  */
 function compile(options: HtmlToTextOptions = {}): CompiledFunction {
+  if (!options || Object.keys(options).length === 0) {
+    return defaultCompiledFunction;
+  }
+
+  const cachedWeak = compileWeakCache.get(options);
+  if (cachedWeak !== undefined) {
+    return cachedWeak;
+  }
+
+  const key = getOptionsCacheKey(options);
+  if (key) {
+    const cachedMap = compileOptionsCache.get(key);
+    if (cachedMap !== undefined) {
+      compileWeakCache.set(options, cachedMap);
+      return cachedMap;
+    }
+  }
+
   const mergedOptions = composeOptions({
     defaultOptions: DEFAULT_OPTIONS,
     genericFormatters: genericFormatters,
@@ -212,7 +255,20 @@ function compile(options: HtmlToTextOptions = {}): CompiledFunction {
     userOptions: options,
   }) as CompiledHtmlToTextOptions;
 
-  return compile_(mergedOptions) as CompiledFunction;
+  const fn = compile_(mergedOptions) as CompiledFunction;
+  compileWeakCache.set(options, fn);
+
+  if (key) {
+    if (compileOptionsCache.size >= COMPILE_CACHE_LIMIT) {
+      const firstKey = compileOptionsCache.keys().next().value;
+      if (firstKey !== undefined) {
+        compileOptionsCache.delete(firstKey);
+      }
+    }
+    compileOptionsCache.set(key, fn);
+  }
+
+  return fn;
 }
 
 /**
@@ -220,7 +276,7 @@ function compile(options: HtmlToTextOptions = {}): CompiledFunction {
  *
  * @param   { string }  html           HTML content to convert.
  * @param   { Options } [options]      HtmlToText options.
- * @param   { any }     [metadata]     Optional metadata for HTML document, for use in formatters.
+ * @param   { unknown } [metadata]     Optional metadata for HTML document, for use in formatters.
  * @returns { string }                 Plain text string.
  * @static
  *

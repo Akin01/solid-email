@@ -93,11 +93,13 @@ class BlockTextBuilder {
     options: BuilderOptions,
     picker: TagDefinitionPicker,
     metadata: MetaData | undefined = undefined,
+    whitespaceProcessor?: WhitespaceProcessor,
   ) {
     this.options = options;
     this.picker = picker;
     this.metadata = metadata;
-    this.whitespaceProcessor = new WhitespaceProcessor(options);
+    this.whitespaceProcessor =
+      whitespaceProcessor ?? new WhitespaceProcessor(options);
     this._stackItem = new BlockStackItem(options);
     this._wordTransformer = undefined;
   }
@@ -193,10 +195,8 @@ class BlockTextBuilder {
   /**
    * Add a node inline into the currently built block.
    */
-  addInline(
-    str: string,
-    { noWordTransform = false }: InlineOptions = {},
-  ): void {
+  addInline(str: string, options?: InlineOptions): void {
+    const noWordTransform = options?.noWordTransform ?? false;
     if (
       !(
         this._stackItem instanceof BlockStackItem ||
@@ -285,11 +285,10 @@ class BlockTextBuilder {
   /**
    * Start building a new block.
    */
-  openBlock({
-    leadingLineBreaks = 1,
-    reservedLineLength = 0,
-    isPre = false,
-  }: OpenBlockOptions = {}): void {
+  openBlock(options?: OpenBlockOptions): void {
+    const leadingLineBreaks = options?.leadingLineBreaks ?? 1;
+    const reservedLineLength = options?.reservedLineLength ?? 0;
+    const isPre = options?.isPre ?? false;
     const maxLineLength = Math.max(
       20,
       (this._stackItem as TextStackItem).inlineTextBuilder.maxLineLength -
@@ -309,10 +308,9 @@ class BlockTextBuilder {
   /**
    * Finalize currently built block, add it's content to the parent block.
    */
-  closeBlock({
-    trailingLineBreaks = 1,
-    blockTransform = undefined,
-  }: CloseBlockOptions = {}): void {
+  closeBlock(options?: CloseBlockOptions): void {
+    const trailingLineBreaks = options?.trailingLineBreaks ?? 1;
+    const blockTransform = options?.blockTransform;
     const block = this._popStackItem<BlockStackItem>();
     const blockText = blockTransform
       ? blockTransform(getText(block))
@@ -328,12 +326,11 @@ class BlockTextBuilder {
   /**
    * Start building a new list.
    */
-  openList({
-    maxPrefixLength = 0,
-    prefixAlign = 'left',
-    interRowLineBreaks = 1,
-    leadingLineBreaks = 2,
-  }: OpenListOptions = {}): void {
+  openList(options?: OpenListOptions): void {
+    const maxPrefixLength = options?.maxPrefixLength ?? 0;
+    const prefixAlign = options?.prefixAlign ?? 'left';
+    const interRowLineBreaks = options?.interRowLineBreaks ?? 1;
+    const leadingLineBreaks = options?.leadingLineBreaks ?? 2;
     this._stackItem = new ListStackItem(this.options, this._stackItem, {
       interRowLineBreaks: interRowLineBreaks,
       leadingLineBreaks: leadingLineBreaks,
@@ -347,7 +344,8 @@ class BlockTextBuilder {
   /**
    * Start building a new list item.
    */
-  openListItem({ prefix = '' }: OpenListItemOptions = {}): void {
+  openListItem(options?: OpenListItemOptions): void {
+    const prefix = options?.prefix ?? '';
     if (!(this._stackItem instanceof ListStackItem)) {
       throw new Error(
         "Can't add a list item to something that is not a list! Check the formatter.",
@@ -431,9 +429,8 @@ class BlockTextBuilder {
   /**
    * Start building a table cell.
    */
-  openTableCell({
-    maxColumnWidth = undefined,
-  }: OpenTableCellOptions = {}): void {
+  openTableCell(options?: OpenTableCellOptions): void {
+    const maxColumnWidth = options?.maxColumnWidth;
     if (!(this._stackItem instanceof TableRowStackItem)) {
       throw new Error(
         "Can't add a table cell to something that is not a table row! Check the formatter.",
@@ -449,10 +446,9 @@ class BlockTextBuilder {
   /**
    * Finalize currently built table cell and add it to parent table row's cells.
    */
-  closeTableCell({
-    colspan = 1,
-    rowspan = 1,
-  }: CloseTableCellOptions = {}): void {
+  closeTableCell(options?: CloseTableCellOptions): void {
+    const colspan = options?.colspan ?? 1;
+    const rowspan = options?.rowspan ?? 1;
     const cell = this._popStackItem<TableCellStackItem>();
     const text = trimCharacter(getText(cell), '\n');
     if (!cell.next) {
@@ -508,9 +504,11 @@ function getText(stackItem: StackItem): string {
       'Only blocks, list items and table cells can be requested for text contents.',
     );
   }
-  return stackItem.inlineTextBuilder.isEmpty()
-    ? stackItem.rawText
-    : stackItem.rawText + stackItem.inlineTextBuilder.toString();
+  if (stackItem.inlineTextBuilder.isEmpty()) {
+    return stackItem.rawText;
+  }
+  const inlineStr = stackItem.inlineTextBuilder.toString();
+  return stackItem.rawText ? stackItem.rawText + inlineStr : inlineStr;
 }
 
 function addText(
@@ -534,7 +532,13 @@ function addText(
   const lineBreaks = Math.max(stackItem.stashedLineBreaks, leadingLineBreaks);
   stackItem.inlineTextBuilder.clear();
   if (parentText) {
-    stackItem.rawText = parentText + '\n'.repeat(lineBreaks) + text;
+    const breakStr =
+      lineBreaks === 1
+        ? '\n'
+        : lineBreaks === 2
+          ? '\n\n'
+          : '\n'.repeat(lineBreaks);
+    stackItem.rawText = parentText + breakStr + text;
   } else {
     stackItem.rawText = text;
     stackItem.leadingLineBreaks = lineBreaks;

@@ -5,8 +5,14 @@
  */
 
 import type { BuilderOptions } from './stack-item.js';
-import { get } from './util.js';
 
+function fastJoin(arr: string[]): string {
+  const len = arr.length;
+  if (len === 0) return '';
+  if (len === 1) return arr[0] ?? '';
+  if (len === 2) return `${arr[0]} ${arr[1]}`;
+  return arr.join(' ');
+}
 /**
  * Helps to build text from words.
  */
@@ -33,14 +39,8 @@ class InlineTextBuilder {
     this.nextLineWords = [];
     this.maxLineLength = maxLineLength || options.wordwrap || Number.MAX_VALUE;
     this.nextLineAvailableChars = this.maxLineLength;
-    this.wrapCharacters =
-      (get(options, ['longWordSplit', 'wrapCharacters']) as
-        | string[]
-        | undefined) || [];
-    this.forceWrapOnLimit =
-      (get(options, ['longWordSplit', 'forceWrapOnLimit']) as
-        | boolean
-        | undefined) || false;
+    this.wrapCharacters = options.longWordSplit?.wrapCharacters || [];
+    this.forceWrapOnLimit = options.longWordSplit?.forceWrapOnLimit ?? false;
 
     this.stashedSpace = false;
     this.wordBreakOpportunity = false;
@@ -64,17 +64,16 @@ class InlineTextBuilder {
       // Does not fit - try to split the word
 
       // The word is moved to a new line - prefer to wrap between words.
-      const [first, ...rest] = this.splitLongWord(word) as [
-        string,
-        ...string[],
-      ];
+      const parts = this.splitLongWord(word);
+      const first = parts[0] ?? '';
       if (!isLineStart) {
         this.startNewLine();
       }
       this.nextLineWords.push(first);
       this.nextLineAvailableChars -= first.length;
-      for (const part of rest) {
+      for (let i = 1; i < parts.length; i++) {
         this.startNewLine();
+        const part = parts[i] ?? '';
         this.nextLineWords.push(part);
         this.nextLineAvailableChars -= part.length;
       }
@@ -108,7 +107,7 @@ class InlineTextBuilder {
       this.wordBreakOpportunity = false;
     } else {
       const lastWord = this.popWord();
-      this.pushWord(lastWord ? lastWord.concat(word) : word, noWrap);
+      this.pushWord(lastWord ? lastWord + word : word, noWrap);
     }
   }
 
@@ -118,7 +117,9 @@ class InlineTextBuilder {
   startNewLine(n = 1): void {
     this.lines.push(this.nextLineWords);
     if (n > 1) {
-      this.lines.push(...Array.from({ length: n - 1 }, () => []));
+      for (let i = 1; i < n; i++) {
+        this.lines.push([]);
+      }
     }
     this.nextLineWords = [];
     this.nextLineAvailableChars = this.maxLineLength;
@@ -146,15 +147,17 @@ class InlineTextBuilder {
       if (index > 0) {
         text += '\n';
       }
-      text += this.lines[index]?.join(' ') ?? '';
+      const line = this.lines[index];
+      if (line && line.length > 0) {
+        text += fastJoin(line);
+      }
     }
     if (this.lines.length > 0) {
       text += '\n';
     }
-    text += this.nextLineWords.join(' ');
+    text += fastJoin(this.nextLineWords);
     return text;
   }
-
   /**
    * Split a long word up to fit within the word wrap limit.
    * Use either a character to split looking back from the word wrap limit,
