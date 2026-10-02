@@ -1,5 +1,5 @@
 /** @jsxRuntime automatic */
-/** @jsxImportSource solid-js */
+/** @jsxImportSource @solidjs/web */
 import {
   Body,
   Button,
@@ -16,7 +16,7 @@ import {
   Section,
   Text,
 } from '@akin01/solid-email';
-import type { JSX } from 'solid-js';
+import type { JSX } from '@solidjs/web';
 import { For } from 'solid-js';
 import {
   features,

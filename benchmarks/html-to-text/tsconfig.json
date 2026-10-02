@@ -14,8 +14,7 @@
     "react-text-template.tsx",
     "text-render-fixture-data.ts",
     "vitest.config.ts",
-    "../utils.ts",
-    "../../packages/render/src/shared/solid-js-web-server.d.ts"
+    "../utils.ts"
   ],
   "exclude": ["dist", "node_modules"]
 }

@@ -1,5 +1,5 @@
 /** @jsxRuntime automatic */
-/** @jsxImportSource solid-js */
+/** @jsxImportSource @solidjs/web */
 
 import {
   Body,

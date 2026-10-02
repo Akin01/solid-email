@@ -1,7 +1,11 @@
-import solid from 'vite-plugin-solid';
+import solid from '@solidjs/vite-plugin';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  oxc: false,
+  esbuild: {
+    jsx: 'automatic',
+  },
   plugins: [
     solid({
       exclude: ['**/react-text-template.tsx'],
@@ -26,6 +30,7 @@ export default defineConfig({
     },
   },
   test: {
+    environment: 'node',
     benchmark: {
       include: ['**/*.bench.ts'],
     },

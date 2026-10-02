@@ -15,7 +15,7 @@
     "solid-email-template.tsx",
     "../tailwind/solid-tailwind-template.tsx",
     "../utils.ts",
-    "../../packages/render/src/shared/solid-js-web-server.d.ts"
+    "../../packages/solid-email/src/render-shim.d.ts"
   ],
   "exclude": ["dist", "node_modules"]
 }

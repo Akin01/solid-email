@@ -17,10 +17,10 @@
     "@akin01/solid-email": "workspace:*",
     "@solid-email/html-to-text": "workspace:*",
     "@solid-email/render": "workspace:*",
-    "html-to-text": "9.0.5",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
-    "react-email": "6.6.3"
+    "html-to-text": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-email": "catalog:"
   },
   "devDependencies": {
     "@types/html-to-text": "9.0.4",
@@ -28,7 +28,7 @@
     "@types/react": "catalog:",
     "tsconfig": "workspace:*",
     "typescript": "catalog:",
-    "vite-plugin-solid": "catalog:",
+    "@solidjs/vite-plugin": "catalog:",
     "vitest": "catalog:"
   }
 }

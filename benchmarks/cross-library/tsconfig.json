@@ -12,7 +12,6 @@
     "**/*.mts",
     "**/*.tsx",
     "**/*.d.ts",
-    "../../packages/render/src/shared/solid-js-web-server.d.ts",
     "../../packages/solid-email/src/render-shim.d.ts"
   ],
   "exclude": ["dist", "node_modules", "results"]
