@@ -1,8 +1,5 @@
-import type { JSX } from 'solid-js';
-import {
-  renderToString,
-  renderToStringAsync,
-} from 'solid-js/web/dist/server.js';
+import type { JSX } from '@solidjs/web';
+import { renderToStream, renderToString } from '@solidjs/web';
 import type { Options, RenderSyncOptions } from './options';
 import { pretty } from './utils/pretty';
 import { toPlainText } from './utils/to-plain-text';
@@ -11,7 +8,10 @@ export type Renderable = JSX.Element | (() => JSX.Element);
 
 const doctype =
   '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">';
-export const solidRenderOptions = { renderId: 'solid-email' } as const;
+export const solidRenderOptions = {
+  renderId: 'solid-email',
+  noScripts: true,
+} as const;
 
 export function normalizeRenderable(node: Renderable) {
   return typeof node === 'function' ? (node as () => JSX.Element) : () => node;
@@ -37,14 +37,13 @@ export function removeSolidResourceScripts(html: string): string {
   if (errorMatch) {
     throw new Error(decodeSerializedString(errorMatch[1] ?? ''));
   }
-  return html.replace(
-    /<script>self\.\$R=self\.\$R\|\|\[\];[\s\S]*?<\/script>/g,
-    '',
-  );
+  return html
+    .replace(/<script>self\.\$R=self\.\$R\|\|\[\];[\s\S]*?<\/script>/g, '')
+    .replace(/<!--!\$-->/g, '');
 }
 
 export function renderDocument(html: string): string {
-  return `${doctype}${html.replace(/<!DOCTYPE.*?>/, '')}`;
+  return `${doctype}${html.replace(/<!DOCTYPE.*?>/, '').replace(/<!--!\$-->/g, '')}`;
 }
 
 export function renderSyncOutput(
@@ -81,10 +80,22 @@ export async function render(
   node: Renderable,
   options?: Options,
 ): Promise<string> {
-  const html = removeSolidResourceScripts(
-    await renderToStringAsync(normalizeRenderable(node), solidRenderOptions),
-  );
+  let renderError: unknown;
+  let hasError = false;
+  const stream = renderToStream(normalizeRenderable(node), {
+    ...solidRenderOptions,
+    noScripts: true,
+    onError(err) {
+      hasError = true;
+      renderError = err;
+    },
+  });
+  const rawHtml = await stream;
+  if (hasError) {
+    throw renderError;
+  }
 
+  const html = removeSolidResourceScripts(rawHtml);
   return renderOutput(html, options);
 }
 

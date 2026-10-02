@@ -1,12 +1,19 @@
 import type { HtmlToTextOptions } from '@solid-email/html-to-text';
-import type { JSX } from 'solid-js';
-import {
-  renderToString,
-  renderToStringAsync,
-} from 'solid-js/web/dist/server.js';
+import type { JSX } from '@solidjs/web';
+import { renderToStream, renderToString } from '@solidjs/web';
 import { removeSolidResourceScripts } from './render';
 import type { SlotValue } from './slots';
 import { toPlainText } from './utils/to-plain-text';
+
+function extractSsrHtml(value: unknown): string | undefined {
+  if (value && typeof value === 'object' && 't' in value) {
+    const text = value.t;
+    if (typeof text === 'string') {
+      return text;
+    }
+  }
+  return undefined;
+}
 
 export async function renderSlotValueAsync(value: SlotValue): Promise<string> {
   if (value == null) return '';
@@ -18,8 +25,10 @@ export async function renderSlotValueAsync(value: SlotValue): Promise<string> {
   if (typeof value === 'boolean') return value ? 'true' : '';
   if (typeof value === 'string') return escapeHtml(value);
   if (typeof value === 'number') return String(value);
+  const ssrHtml = extractSsrHtml(value);
+  if (ssrHtml !== undefined) return removeSolidResourceScripts(ssrHtml);
   return removeSolidResourceScripts(
-    await renderToStringAsync(() => value as JSX.Element),
+    await renderToStream(() => value as JSX.Element, { noScripts: true }),
   );
 }
 
@@ -29,6 +38,8 @@ export function renderSlotValueSync(value: SlotValue): string {
   if (typeof value === 'boolean') return value ? 'true' : '';
   if (typeof value === 'string') return escapeHtml(value);
   if (typeof value === 'number') return String(value);
+  const ssrHtml = extractSsrHtml(value);
+  if (ssrHtml !== undefined) return removeSolidResourceScripts(ssrHtml);
   return removeSolidResourceScripts(renderToString(() => value as JSX.Element));
 }
 
@@ -46,10 +57,13 @@ export async function renderSlotValueTextAsync(
   if (typeof value === 'boolean') return value ? 'true' : '';
   if (typeof value === 'string') return value;
   if (typeof value === 'number') return String(value);
-
-  const html = removeSolidResourceScripts(
-    await renderToStringAsync(() => value as JSX.Element),
-  );
+  const ssrHtml = extractSsrHtml(value);
+  const html =
+    ssrHtml !== undefined
+      ? removeSolidResourceScripts(ssrHtml)
+      : removeSolidResourceScripts(
+          await renderToStream(() => value as JSX.Element, { noScripts: true }),
+        );
   return toPlainText(html, options);
 }
 
@@ -64,10 +78,11 @@ export function renderSlotValueTextSync(
   if (typeof value === 'boolean') return value ? 'true' : '';
   if (typeof value === 'string') return value;
   if (typeof value === 'number') return String(value);
-
-  const html = removeSolidResourceScripts(
-    renderToString(() => value as JSX.Element),
-  );
+  const ssrHtml = extractSsrHtml(value);
+  const html =
+    ssrHtml !== undefined
+      ? removeSolidResourceScripts(ssrHtml)
+      : removeSolidResourceScripts(renderToString(() => value as JSX.Element));
   return toPlainText(html, options);
 }
 

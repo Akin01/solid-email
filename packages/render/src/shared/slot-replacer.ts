@@ -8,6 +8,7 @@ import type { SlotOccurrence, SlotValue } from './slots';
 export type SlotLookup = {
   content: Map<string, SlotOccurrence[]>;
   attr: Map<string, string[]>;
+  requiredSlots?: string[];
 };
 
 export function buildMarkerRegex(lookup: SlotLookup): RegExp {
@@ -40,6 +41,18 @@ export function validateSlots<TSlots extends Record<string, SlotValue>>(
   data: TSlots,
   lookup: SlotLookup,
 ): void {
+  const requiredSlots = lookup.requiredSlots;
+  if (requiredSlots) {
+    for (const name of requiredSlots) {
+      if ((data as Record<string, unknown>)[name] === undefined) {
+        console.warn(
+          `[solid-email] Slot "${name}" has no default and was not provided in render data. It will render as empty.`,
+        );
+      }
+    }
+    return;
+  }
+
   const allSlotNames = new Set([
     ...lookup.content.keys(),
     ...lookup.attr.keys(),
@@ -74,7 +87,8 @@ export async function replaceSlots<TSlots extends Record<string, SlotValue>>({
   validate: boolean;
 }): Promise<string> {
   if (validate) validateSlots(data, lookup);
-  const replacements = new Map<string, string>();
+  const replacements: Record<string, string> = Object.create(null);
+  let replacementCount = 0;
 
   for (const [name, occurrences] of lookup.content) {
     const value = data[name as keyof TSlots] as SlotValue | undefined;
@@ -91,7 +105,8 @@ export async function replaceSlots<TSlots extends Record<string, SlotValue>>({
           markerRegex,
           validate: false,
         }));
-      replacements.set(occ.full, replacement);
+      replacements[occ.full] = replacement;
+      replacementCount++;
     }
   }
 
@@ -99,15 +114,16 @@ export async function replaceSlots<TSlots extends Record<string, SlotValue>>({
     const value = data[name as keyof TSlots] as SlotValue | undefined;
     const replacement = renderAttrValue(name, value);
     for (const marker of markers) {
-      replacements.set(marker, replacement);
+      replacements[marker] = replacement;
+      replacementCount++;
     }
   }
 
-  if (replacements.size === 0) return result;
+  if (replacementCount === 0) return result;
 
   return result.replace(
     markerRegex,
-    (marker) => replacements.get(marker) ?? marker,
+    (marker) => replacements[marker] ?? marker,
   );
 }
 
@@ -125,7 +141,8 @@ export function replaceSlotsSync<TSlots extends Record<string, SlotValue>>({
   validate: boolean;
 }): string {
   if (validate) validateSlots(data, lookup);
-  const replacements = new Map<string, string>();
+  const replacements: Record<string, string> = Object.create(null);
+  let replacementCount = 0;
 
   for (const [name, occurrences] of lookup.content) {
     const value = data[name as keyof TSlots] as SlotValue | undefined;
@@ -142,7 +159,8 @@ export function replaceSlotsSync<TSlots extends Record<string, SlotValue>>({
           markerRegex,
           validate: false,
         });
-      replacements.set(occ.full, replacement);
+      replacements[occ.full] = replacement;
+      replacementCount++;
     }
   }
 
@@ -150,15 +168,16 @@ export function replaceSlotsSync<TSlots extends Record<string, SlotValue>>({
     const value = data[name as keyof TSlots] as SlotValue | undefined;
     const replacement = renderAttrValue(name, value);
     for (const marker of markers) {
-      replacements.set(marker, replacement);
+      replacements[marker] = replacement;
+      replacementCount++;
     }
   }
 
-  if (replacements.size === 0) return result;
+  if (replacementCount === 0) return result;
 
   return result.replace(
     markerRegex,
-    (marker) => replacements.get(marker) ?? marker,
+    (marker) => replacements[marker] ?? marker,
   );
 }
 

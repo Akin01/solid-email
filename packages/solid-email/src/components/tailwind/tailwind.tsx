@@ -1,12 +1,12 @@
+import type { JSX } from '@solidjs/web';
+import { ssr } from '@solidjs/web';
 import {
   type CssNode,
   generate,
   List,
   type StyleSheet,
 } from 'css-tree/dist/csstree.esm';
-import type { JSX } from 'solid-js';
-import { createResource, Suspense } from 'solid-js/dist/server.js';
-import { ssr } from 'solid-js/web/dist/server.js';
+import { createMemo, Loading } from 'solid-js';
 import type { Config } from 'tailwindcss';
 import type { SolidStyle } from '../shared';
 import { sanitizeStyleSheet } from './sanitize-stylesheet';
@@ -130,16 +130,28 @@ function stringifyConfig(value: unknown): string {
   });
 }
 
+const CLASS_ATTR_CAPTURE = /\sclass="([^"]*)"/;
+const STYLE_ATTR_CAPTURE = /\sstyle="([^"]*)"/;
+const CLASS_ATTR_REMOVE = /\sclass="[^"]*"/;
+const STYLE_ATTR_REMOVE = /\sstyle="[^"]*"/;
+
 function getAttribute(tag: string, name: string): string | undefined {
+  if (name === 'class') return CLASS_ATTR_CAPTURE.exec(tag)?.[1];
+  if (name === 'style') return STYLE_ATTR_CAPTURE.exec(tag)?.[1];
   const match = new RegExp(`\\s${name}="([^"]*)"`).exec(tag);
   return match?.[1];
 }
 
 function removeAttribute(tag: string, name: string): string {
+  if (name === 'class') return tag.replace(CLASS_ATTR_REMOVE, '');
+  if (name === 'style') return tag.replace(STYLE_ATTR_REMOVE, '');
   return tag.replace(new RegExp(`\\s${name}="[^"]*"`), '');
 }
 
 function escapeAttribute(value: string): string {
+  if (!value.includes('&') && !value.includes('"') && !value.includes('<')) {
+    return value;
+  }
   return value
     .replaceAll('&', '&amp;')
     .replaceAll('"', '&quot;')
@@ -148,9 +160,20 @@ function escapeAttribute(value: string): string {
 
 function setAttribute(tag: string, name: string, value: string): string {
   const replacement = ` ${name}="${escapeAttribute(value)}"`;
-  const attributePattern = new RegExp(`\\s${name}="[^"]*"`);
-  if (attributePattern.test(tag))
-    return tag.replace(attributePattern, replacement);
+  if (name === 'class') {
+    if (CLASS_ATTR_REMOVE.test(tag)) {
+      return tag.replace(CLASS_ATTR_REMOVE, replacement);
+    }
+  } else if (name === 'style') {
+    if (STYLE_ATTR_REMOVE.test(tag)) {
+      return tag.replace(STYLE_ATTR_REMOVE, replacement);
+    }
+  } else {
+    const attributePattern = new RegExp(`\\s${name}="[^"]*"`);
+    if (attributePattern.test(tag)) {
+      return tag.replace(attributePattern, replacement);
+    }
+  }
 
   const suffix = tag.endsWith('/>') ? '/>' : '>';
   return `${tag.slice(0, -suffix.length)}${replacement}${suffix}`;
@@ -211,6 +234,7 @@ interface TailwindRenderPlan {
   inlineResults: Map<string, InlineClassResult>;
   nonInlineCss: string;
   nonInlinableClassNames: string[];
+  tagCache: Map<string, string>;
 }
 
 const tailwindRenderPlanCache = new Map<string, TailwindRenderPlan>();
@@ -242,11 +266,18 @@ function renderFromTailwindPlan(
   plan: TailwindRenderPlan,
 ): string | undefined {
   let missingClassGroup = false;
+  const tagCache = plan.tagCache;
   const result = html.replace(
     /<([A-Za-z][A-Za-z0-9:-]*)([^<>]*?)>/g,
     (tag: string) => {
+      const cached = tagCache.get(tag);
+      if (cached !== undefined) return cached;
+
       const classAttribute = getAttribute(tag, 'class');
-      if (!classAttribute) return tag;
+      if (!classAttribute) {
+        tagCache.set(tag, tag);
+        return tag;
+      }
 
       const inlineResult = plan.inlineResults.get(classAttribute);
       if (!inlineResult) {
@@ -254,7 +285,9 @@ function renderFromTailwindPlan(
         return tag;
       }
 
-      return applyInlineClassResult(tag, inlineResult);
+      const transformed = applyInlineClassResult(tag, inlineResult);
+      tagCache.set(tag, transformed);
+      return transformed;
     },
   );
 
@@ -278,10 +311,18 @@ function inlineClassStyles(
   nonInlinableRules: RulesPerClass['nonInlinable'],
   customProperties: CustomProperties,
   inlineCache: Map<string, InlineClassResult>,
+  tagCache?: Map<string, string>,
 ): string {
   return html.replace(/<([A-Za-z][A-Za-z0-9:-]*)([^<>]*?)>/g, (tag: string) => {
+    if (tagCache) {
+      const cached = tagCache.get(tag);
+      if (cached !== undefined) return cached;
+    }
     const classAttribute = getAttribute(tag, 'class');
-    if (!classAttribute) return tag;
+    if (!classAttribute) {
+      tagCache?.set(tag, tag);
+      return tag;
+    }
 
     let inlineResult = inlineCache.get(classAttribute);
     if (!inlineResult) {
@@ -306,8 +347,9 @@ function inlineClassStyles(
       };
       inlineCache.set(classAttribute, inlineResult);
     }
-
-    return applyInlineClassResult(tag, inlineResult);
+    const transformed = applyInlineClassResult(tag, inlineResult);
+    tagCache?.set(tag, transformed);
+    return transformed;
   });
 }
 
@@ -341,12 +383,14 @@ function renderTailwindHtml(
   downlevelForEmailClients(nonInlineStyles);
 
   const inlineResults = new Map<string, InlineClassResult>();
+  const tagCache = new Map<string, string>();
   let result = inlineClassStyles(
     html,
     inlinableRules,
     nonInlinableRules,
     customProperties,
     inlineResults,
+    tagCache,
   );
 
   const nonInlineCss =
@@ -356,6 +400,7 @@ function renderTailwindHtml(
     inlineResults,
     nonInlineCss,
     nonInlinableClassNames,
+    tagCache,
   });
 
   if (!nonInlineCss) return result;
@@ -381,20 +426,20 @@ export function Tailwind(props: TailwindProps) {
       utility: props.utility,
     },
   });
-  const [html] = createResource(
-    () => stringifyConfig(twConfigData()),
-    async (configKey) => {
-      const html = toHtml(props.children);
-      const classesUsed = collectClasses(html);
+  const html = createMemo(
+    async () => {
+      const configKey = stringifyConfig(twConfigData());
+      const rawHtml = toHtml(props.children);
+      const classesUsed = collectClasses(rawHtml);
       const renderPlanKey = `${configKey}\n${classesUsed.join('\0')}`;
       const cachedPlan = tailwindRenderPlanCache.get(renderPlanKey);
       if (cachedPlan) {
-        const cachedHtml = renderFromTailwindPlan(html, cachedPlan);
+        const cachedHtml = renderFromTailwindPlan(rawHtml, cachedPlan);
         if (cachedHtml !== undefined) return cachedHtml;
       }
 
       const setup = await setupTailwind(twConfigData());
-      return renderTailwindHtml(html, classesUsed, setup, renderPlanKey);
+      return renderTailwindHtml(rawHtml, classesUsed, setup, renderPlanKey);
     },
     { deferStream: true },
   );
@@ -406,5 +451,5 @@ export function Tailwind(props: TailwindProps) {
     const rawHtml = ssr(value) as unknown as JSX.Element;
     return rawHtml;
   };
-  return <Suspense fallback={null}>{content()}</Suspense>;
+  return <Loading fallback={null}>{content()}</Loading>;
 }

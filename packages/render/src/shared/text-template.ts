@@ -44,6 +44,22 @@ const TEXT_SKIP_START = '__SM_TXS_';
 const TEXT_SKIP_END = '__SM_TXE_';
 const LINK_HREF_PREFIX = '__SM_LNK_';
 
+function resolveContentSlotName(
+  decodedName: string,
+  contentSlots: Map<string, SlotOccurrence[]>,
+): string {
+  if (contentSlots.has(decodedName)) {
+    return decodedName;
+  }
+  const lower = decodedName.toLowerCase();
+  for (const name of contentSlots.keys()) {
+    if (name.toLowerCase() === lower) {
+      return name;
+    }
+  }
+  return decodedName;
+}
+
 export function createPlainTextTemplate({
   html,
   options,
@@ -57,8 +73,7 @@ export function createPlainTextTemplate({
 }): PlainTextTemplate {
   const marked = markTextTemplateSlots(html, options);
   const text = toPlainText(marked.html, options);
-  const parsed = parseTextTemplate(text);
-
+  const parsed = parseTextTemplate(text, contentSlots);
   return {
     nodes: parsed.nodes,
     usable: canUsePlainTextTemplate({
@@ -206,7 +221,6 @@ function canUsePlainTextTemplate({
       return false;
     }
   }
-
   return true;
 }
 
@@ -283,7 +297,10 @@ function markTextTemplateSlots(
   };
 }
 
-function parseTextTemplate(text: string): ParsedTextTemplate {
+function parseTextTemplate(
+  text: string,
+  knownContentSlots?: Map<string, SlotOccurrence[]>,
+): ParsedTextTemplate {
   const tokenRegex = new RegExp(
     `${escapeRegex(CONTENT_START)}(${MARKER_NAME_CHARS})__|${escapeRegex(CONTENT_END)}(${MARKER_NAME_CHARS})__|${escapeRegex(ATTR_PREFIX)}(${MARKER_NAME_CHARS})__|${escapeRegex(LINK_HREF_PREFIX)}(${MARKER_NAME_CHARS})__|${escapeRegex(TEXT_SKIP_START)}(${MARKER_NAME_CHARS})__|${escapeRegex(TEXT_SKIP_END)}(${MARKER_NAME_CHARS})__`,
     'g',
@@ -322,10 +339,14 @@ function parseTextTemplate(text: string): ParsedTextTemplate {
     ] = match;
 
     if (contentStart !== undefined) {
+      const decoded = decodeName(contentStart);
+      const resolvedName = knownContentSlots
+        ? resolveContentSlotName(decoded, knownContentSlots)
+        : decoded;
       stack.push({
         kind: 'contentSlot',
         encodedName: contentStart,
-        name: decodeName(contentStart),
+        name: resolvedName,
         nodes: [],
       });
       continue;
@@ -333,11 +354,12 @@ function parseTextTemplate(text: string): ParsedTextTemplate {
 
     if (contentEnd !== undefined) {
       const frame = stack[stack.length - 1];
-      if (
-        frame?.kind !== 'contentSlot' ||
-        frame.encodedName !== contentEnd ||
-        !frame.name
-      ) {
+      const isMatchingEnd =
+        frame?.kind === 'contentSlot' &&
+        frame.encodedName !== undefined &&
+        (frame.encodedName === contentEnd ||
+          frame.encodedName.toUpperCase() === contentEnd.toUpperCase());
+      if (!frame || !isMatchingEnd || !frame.name) {
         valid = false;
         addText(token);
         continue;
