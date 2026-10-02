@@ -1,5 +1,5 @@
 import { marked, Renderer } from 'marked';
-import { splitProps } from 'solid-js';
+import { omit } from 'solid-js';
 import {
   cls,
   type IntrinsicProps,
@@ -27,12 +27,16 @@ const styleAttr = (style: SolidStyle | undefined) => {
 const escapeHtmlAttribute = (value: string) => value.replaceAll('"', '&quot;');
 
 export function Markdown(props: MarkdownProps) {
-  const [local, rest] = splitProps(props, [
+  const rest = omit(
+    props,
     'children',
     'markdownCustomStyles',
     'markdownContainerStyles',
-  ]);
-  const finalStyles = { ...styles, ...local.markdownCustomStyles };
+    'class',
+    'className',
+    'style',
+  );
+  const finalStyles = { ...styles, ...props.markdownCustomStyles };
   const renderer = new Renderer();
 
   renderer.blockquote = ({ tokens }) => {
@@ -136,7 +140,7 @@ export function Markdown(props: MarkdownProps) {
   renderer.tablerow = ({ text }) =>
     `<tr${styleAttr(finalStyles.tr)}>\n${text}</tr>\n`;
 
-  const html = marked.parse(local.children, {
+  const html = marked.parse(props.children, {
     renderer,
     async: false,
   }) as string;
@@ -147,7 +151,7 @@ export function Markdown(props: MarkdownProps) {
       data-id="_solid-email-markdown"
       class={cls(props)}
       innerHTML={html}
-      style={normalizeStyle(local.markdownContainerStyles)}
+      style={normalizeStyle(props.markdownContainerStyles)}
     />
   );
 }

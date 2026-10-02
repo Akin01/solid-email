@@ -2,6 +2,9 @@
   "name": "tsconfig",
   "version": "0.1.3",
   "private": true,
+  "scripts": {
+    "format": "biome format --write ."
+  },
   "files": [
     "LICENSE",
     "base.json",

@@ -19,13 +19,13 @@ export function Container(props: ContainerProps) {
   const classValue = cls(props);
   return (
     <table
-      attr:align="center"
-      attr:width="100%"
+      align="center"
+      width="100%"
       {...withoutClass(props)}
       {...(classValue ? { class: classValue } : {})}
-      attr:border={0}
-      attr:cellpadding="0"
-      attr:cellspacing="0"
+      border={0}
+      cellpadding="0"
+      cellspacing="0"
       role="presentation"
       style={tableHtmlStyle}
     >

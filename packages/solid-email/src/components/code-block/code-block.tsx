@@ -1,4 +1,5 @@
-import { type JSX, splitProps } from 'solid-js';
+import type { JSX } from '@solidjs/web';
+import { omit } from 'solid-js';
 import {
   cls,
   type IntrinsicProps,
@@ -88,7 +89,8 @@ const CodeBlockLine = (props: {
 };
 
 export function CodeBlock(props: Readonly<CodeBlockProps>) {
-  const [local, rest] = splitProps(props, [
+  const rest = omit(
+    props,
     'class',
     'className',
     'code',
@@ -97,15 +99,15 @@ export function CodeBlock(props: Readonly<CodeBlockProps>) {
     'lineNumbers',
     'style',
     'theme',
-  ]);
-  const languageGrammar = Prism.languages[local.language];
+  );
+  const languageGrammar = Prism.languages[props.language];
   if (typeof languageGrammar === 'undefined') {
     throw new Error(
-      `CodeBlock: There is no language defined on Prism called ${local.language}`,
+      `CodeBlock: There is no language defined on Prism called ${props.language}`,
     );
   }
 
-  const lines = local.code.split(/\r\n|\r|\n/gm);
+  const lines = props.code.split(/\r\n|\r|\n/gm);
   const tokensPerLine = lines.map((line) =>
     Prism.tokenize(line, languageGrammar),
   );
@@ -113,23 +115,23 @@ export function CodeBlock(props: Readonly<CodeBlockProps>) {
   return (
     <pre
       {...withoutClass(rest)}
-      {...(cls(local) ? { class: cls(local) } : {})}
+      {...(cls(props) ? { class: cls(props) } : {})}
       style={renderStyle({
-        ...(local.theme.base ?? {}),
+        ...(props.theme.base ?? {}),
         width: '100%',
-        ...styleObject(local.style),
+        ...styleObject(props.style),
       })}
     >
       <code>
         {tokensPerLine.map((tokensForLine, lineIndex) => (
           <>
-            {local.lineNumbers ? (
+            {props.lineNumbers ? (
               <span
                 style={renderStyle({
                   width: '2em',
                   height: '1em',
                   display: 'inline-block',
-                  'font-family': local.fontFamily,
+                  'font-family': props.fontFamily,
                 })}
               >
                 {lineIndex + 1}
@@ -138,8 +140,8 @@ export function CodeBlock(props: Readonly<CodeBlockProps>) {
 
             {tokensForLine.map((token) => (
               <CodeBlockLine
-                inheritedStyles={{ 'font-family': local.fontFamily }}
-                theme={local.theme}
+                inheritedStyles={{ 'font-family': props.fontFamily }}
+                theme={props.theme}
                 token={token}
               />
             ))}

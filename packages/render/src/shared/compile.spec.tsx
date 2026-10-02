@@ -1,5 +1,5 @@
 import type { FormatCallback } from '@solid-email/html-to-text';
-import type { JSX } from 'solid-js';
+import type { JSX } from '@solidjs/web';
 import { describe, expect, it, vi } from 'vitest';
 import { compile, compileSync } from './compile';
 import { Slot, slot } from './slots';

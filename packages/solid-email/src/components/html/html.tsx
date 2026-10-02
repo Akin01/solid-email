@@ -13,8 +13,8 @@ export function Html(props: HtmlProps) {
     <html
       {...withoutClass(props)}
       {...(classValue ? { class: classValue } : {})}
-      dir={props.dir ?? 'ltr'}
       lang={props.lang ?? 'en'}
+      dir={props.dir ?? 'ltr'}
       {...(style ? { style } : {})}
     >
       {props.children}

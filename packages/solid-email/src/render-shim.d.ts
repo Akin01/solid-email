@@ -3,8 +3,8 @@ declare module '@solid-email/render' {
     HtmlToTextOptions,
     SelectorDefinition,
   } from '@solid-email/html-to-text';
+  import type { JSX } from '@solidjs/web';
   import type { Options as PrettierOptions } from 'prettier';
-  import type { JSX } from 'solid-js';
 
   export type Renderable = JSX.Element | (() => JSX.Element);
   export type Options = {
@@ -85,19 +85,6 @@ declare module '@solid-email/render' {
     node: Renderable,
     options?: CompileSyncOptions,
   ): CompiledTemplate<TSlots>;
-}
-
-declare module 'solid-js/web/dist/server.js' {
-  export {
-    Dynamic,
-    renderToString,
-    renderToStringAsync,
-    ssr,
-  } from 'solid-js/web';
-}
-
-declare module 'solid-js/dist/server.js' {
-  export { createResource, Suspense } from 'solid-js';
 }
 
 declare module 'css-tree/dist/csstree.esm' {

@@ -1,4 +1,4 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from '@solidjs/web';
 import { describe, expect, it } from 'vitest';
 import {
   render as browserRender,

@@ -92,12 +92,7 @@ describe('Solid style and class props', () => {
 
   it('preserves email-specific and data attributes on table primitives', async () => {
     const html = await render(() => (
-      <Column
-        attr:align="right"
-        attr:valign="top"
-        data-testid="column-test"
-        attr:width="50%"
-      >
+      <Column align="right" valign="top" data-testid="column-test" width="50%">
         Cell
       </Column>
     ));

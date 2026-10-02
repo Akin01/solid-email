@@ -1,4 +1,4 @@
-import { splitProps } from 'solid-js';
+import { omit } from 'solid-js';
 import {
   cls,
   type IntrinsicProps,
@@ -37,14 +37,8 @@ const px = (value: number | undefined) =>
 export type ButtonProps = Readonly<IntrinsicProps<'a'>>;
 
 export function Button(props: ButtonProps) {
-  const [local, rest] = splitProps(props, [
-    'children',
-    'class',
-    'className',
-    'style',
-    'target',
-  ]);
-  const style = styleObject(local.style);
+  const rest = omit(props, 'children', 'class', 'className', 'style', 'target');
+  const style = styleObject(props.style);
   const {
     'padding-top': paddingTop,
     'padding-right': paddingRight,
@@ -61,8 +55,8 @@ export function Button(props: ButtonProps) {
   return (
     <a
       {...withoutClass(rest)}
-      class={cls(local)}
-      target={local.target ?? '_blank'}
+      class={cls(props)}
+      target={props.target ?? '_blank'}
       style={normalizeStyle({
         'line-height': '100%',
         'text-decoration': 'none',
@@ -100,7 +94,7 @@ export function Button(props: ButtonProps) {
               : `${pxToPt(paddingBottom)}px`,
         })}
       >
-        {local.children}
+        {props.children}
       </span>
       <span
         innerHTML={`<!--[if mso]><i style="mso-font-width:${
