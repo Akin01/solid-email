@@ -20,7 +20,50 @@ import type {
 } from '../types.js';
 import { BlockTextBuilder } from './block-text-builder.js';
 import { limitedDepthRecursive, unicodeEscape } from './util.js';
+import { WhitespaceProcessor } from './whitespace-processor.js';
 
+const EMPTY_OBJECT = Object.freeze({});
+const pickerCache = new Map<string, SelectorPicker>();
+const pickerWeakCache = new WeakMap<object, SelectorPicker>();
+
+function getSelectorsCacheKey(selectors: SelectorDefinition[]): string {
+  try {
+    return JSON.stringify(selectors, (_key, val) =>
+      typeof val === 'function' ? val.toString() : val,
+    );
+  } catch {
+    return '';
+  }
+}
+
+function getOrBuildPicker(selectors: SelectorDefinition[]): SelectorPicker {
+  const cachedFromWeak = pickerWeakCache.get(selectors);
+  if (cachedFromWeak !== undefined) {
+    return cachedFromWeak;
+  }
+  const key = getSelectorsCacheKey(selectors);
+  if (key) {
+    const cachedFromMap = pickerCache.get(key);
+    if (cachedFromMap !== undefined) {
+      pickerWeakCache.set(selectors, cachedFromMap);
+      return cachedFromMap;
+    }
+  }
+  const picker = new DecisionTree(selectors.map((s) => [s.selector, s])).build(
+    hp2Builder,
+  );
+  pickerWeakCache.set(selectors, picker);
+  if (key) {
+    if (pickerCache.size >= 128) {
+      const first = pickerCache.keys().next().value;
+      if (first !== undefined) {
+        pickerCache.delete(first);
+      }
+    }
+    pickerCache.set(key, picker);
+  }
+  return picker;
+}
 type SelectorPicker = ReturnType<typeof hp2Builder<SelectorDefinition>>;
 type BaseSelectorPicker = ReturnType<typeof hp2Builder<number>>;
 type SelectorPickerElement = Parameters<SelectorPicker['pick1']>[0];
@@ -48,9 +91,8 @@ function compile(options: HtmlToTextOptions = {}): CompiledFunction {
         selectorsWithoutFormat.map((s) => `\`${s.selector}\``).join(', '),
     );
   }
-  const picker = new DecisionTree(
-    resolvedOptions.selectors.map((s) => [s.selector, s]),
-  ).build(hp2Builder);
+  const picker = getOrBuildPicker(resolvedOptions.selectors);
+  const whitespaceProcessor = new WhitespaceProcessor(resolvedOptions);
 
   if (typeof resolvedOptions.encodeCharacters !== 'function') {
     resolvedOptions.encodeCharacters = makeReplacerFromDict(
@@ -87,6 +129,7 @@ function compile(options: HtmlToTextOptions = {}): CompiledFunction {
       picker,
       findBaseElements,
       limitedWalk,
+      whitespaceProcessor,
     );
 }
 
@@ -112,6 +155,7 @@ function process(
   picker: SelectorPicker,
   findBaseElements: BaseElementFinder,
   walk: Walk,
+  whitespaceProcessor: WhitespaceProcessor,
 ): string {
   const maxInputLength = options.limits.maxInputLength;
   if (maxInputLength && html && html.length > maxInputLength) {
@@ -127,6 +171,7 @@ function process(
     options,
     picker as unknown as BlockTextBuilderPicker,
     metadata,
+    whitespaceProcessor,
   );
   walk(bases, builder);
   return builder.toString();
@@ -189,14 +234,15 @@ function usesDefaultBodyBaseSelector(
 }
 
 function findFirstBody(nodes: DomNode[]): DomNode | undefined {
-  for (const elem of nodes) {
-    if (elem.type !== 'tag') {
-      continue;
-    }
-    if (elem.name === 'body') {
+  for (let i = 0; i < nodes.length; i++) {
+    const elem = nodes[i];
+    if (elem && elem.type === 'tag' && elem.name === 'body') {
       return elem;
     }
-    if (elem.children) {
+  }
+  for (let i = 0; i < nodes.length; i++) {
+    const elem = nodes[i];
+    if (elem && elem.type === 'tag' && elem.children) {
       const found = findFirstBody(elem.children);
       if (found) {
         return found;
@@ -283,7 +329,10 @@ function recursiveWalk(
   for (const elem of dom) {
     switch (elem.type) {
       case 'text': {
-        builder.addInline(elem.data as string);
+        const text = elem.data as string;
+        if (text && text.length > 0) {
+          builder.addInline(text);
+        }
         break;
       }
       case 'tag': {
@@ -297,7 +346,7 @@ function recursiveWalk(
           elem,
           walk as RecursiveCallback,
           builder,
-          tagDefinition.options || {},
+          tagDefinition.options || EMPTY_OBJECT,
         );
         break;
       }

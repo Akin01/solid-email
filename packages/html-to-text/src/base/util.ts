@@ -38,12 +38,13 @@ function limitedDepthRecursive<Args extends unknown[]>(
  * @returns { string }
  */
 function trimCharacter(str: string, char: string): string {
+  const code = char.charCodeAt(0);
   let start = 0;
   let end = str.length;
-  while (start < end && str[start] === char) {
+  while (start < end && str.charCodeAt(start) === code) {
     ++start;
   }
-  while (end > start && str[end - 1] === char) {
+  while (end > start && str.charCodeAt(end - 1) === code) {
     --end;
   }
   return start > 0 || end < str.length ? str.substring(start, end) : str;
@@ -58,8 +59,9 @@ function trimCharacter(str: string, char: string): string {
  * @returns { string }
  */
 function trimCharacterEnd(str: string, char: string): string {
+  const code = char.charCodeAt(0);
   let end = str.length;
-  while (end > 0 && str[end - 1] === char) {
+  while (end > 0 && str.charCodeAt(end - 1) === code) {
     --end;
   }
   return end < str.length ? str.substring(0, end) : str;

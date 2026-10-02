@@ -38,17 +38,22 @@ class WhitespaceProcessor {
    * @memberof WhitespaceProcessor
    */
   whitespaceChars: string;
+  whitespaceTable: Uint8Array;
   leadingWhitespaceRe: RegExp;
   trailingWhitespaceRe: RegExp;
   allWhitespaceOrEmptyRe: RegExp;
   newlineOrNonWhitespaceRe: RegExp;
   newlineOrNonNewlineStringRe: RegExp;
   shrinkWrapAdd: ShrinkWrapAdd;
-
   constructor(options: WhitespaceProcessorOptions) {
     this.whitespaceChars = options.preserveNewlines
       ? options.whitespaceCharacters.replace(/\n/g, '')
       : options.whitespaceCharacters;
+    const table = new Uint8Array(65536);
+    for (let i = 0; i < this.whitespaceChars.length; i++) {
+      table[this.whitespaceChars.charCodeAt(i)] = 1;
+    }
+    this.whitespaceTable = table;
     const whitespaceCodes = charactersToCodes(this.whitespaceChars);
     this.leadingWhitespaceRe = new RegExp(`^[${whitespaceCodes}]`);
     this.trailingWhitespaceRe = new RegExp(`[${whitespaceCodes}]$`);
@@ -76,6 +81,7 @@ class WhitespaceProcessor {
         transform: TextTransform = (str) => str,
         noWrap = false,
       ) {
+        wordOrNewlineRe.lastIndex = 0;
         if (!text) {
           return;
         }
@@ -121,6 +127,7 @@ class WhitespaceProcessor {
         transform: TextTransform | undefined = undefined,
         noWrap = false,
       ) {
+        wordRe.lastIndex = 0;
         if (!text) {
           return;
         }
@@ -176,6 +183,7 @@ class WhitespaceProcessor {
     }
     const previouslyStashedSpace = inlineTextBuilder.stashedSpace;
     let anyMatch = false;
+    this.newlineOrNonNewlineStringRe.lastIndex = 0;
     let m = this.newlineOrNonNewlineStringRe.exec(text);
     if (m) {
       anyMatch = true;
@@ -208,49 +216,34 @@ class WhitespaceProcessor {
    * @returns { boolean }
    */
   testLeadingWhitespace(text: string): boolean {
-    return this.leadingWhitespaceRe.test(text);
+    return text.length > 0 && this.whitespaceTable[text.charCodeAt(0)] === 1;
   }
 
-  /**
-   * Test whether the given text ends with HTML whitespace character.
-   *
-   * @param   { string }  text  The string to test.
-   * @returns { boolean }
-   */
   testTrailingWhitespace(text: string): boolean {
-    return this.trailingWhitespaceRe.test(text);
+    return (
+      text.length > 0 &&
+      this.whitespaceTable[text.charCodeAt(text.length - 1)] === 1
+    );
   }
 
-  /**
-   * Test whether the given text contains any non-whitespace characters.
-   *
-   * @param   { string }  text  The string to test.
-   * @returns { boolean }
-   */
   testContainsWords(text: string): boolean {
-    return !this.allWhitespaceOrEmptyRe.test(text);
+    const table = this.whitespaceTable;
+    for (let i = 0; i < text.length; i++) {
+      if (table[text.charCodeAt(i)] === 0) {
+        return true;
+      }
+    }
+    return false;
   }
 
-  /**
-   * Return the number of newlines if there are no words.
-   *
-   * If any word is found then return zero regardless of the actual number of newlines.
-   *
-   * @param   { string }  text  Input string.
-   * @returns { number }
-   */
   countNewlinesNoWords(text: string): number {
-    this.newlineOrNonWhitespaceRe.lastIndex = 0;
+    const table = this.whitespaceTable;
     let counter = 0;
-    let match: RegExpExecArray | null = null;
-    while (true) {
-      match = this.newlineOrNonWhitespaceRe.exec(text);
-      if (match === null) {
-        break;
-      }
-      if (match[0] === '\n') {
+    for (let i = 0; i < text.length; i++) {
+      const code = text.charCodeAt(i);
+      if (code === 10) {
         counter++;
-      } else {
+      } else if (table[code] === 0) {
         return 0;
       }
     }
