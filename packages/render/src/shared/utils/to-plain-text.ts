@@ -9,7 +9,7 @@ import {
 // preview-only nodes are skipped, and links render without duplicated hrefs.
 export const plainTextSelectors: SelectorDefinition[] = [
   { selector: 'img', format: 'skip' },
-  { selector: '[data-skip-in-text=true]', format: 'skip' },
+  { selector: '[data-skip-in-text]', format: 'skip' },
   {
     selector: 'a',
     options: { linkBrackets: false, hideLinkHrefIfSameAsText: true },

@@ -1,7 +1,4 @@
-import {
-  renderToString,
-  renderToStringAsync,
-} from 'solid-js/web/dist/server.js';
+import { renderToStream, renderToString } from '@solidjs/web';
 import type {
   CompiledRenderOptions,
   CompiledRenderSyncOptions,
@@ -31,8 +28,6 @@ import {
   renderTextTemplateSync,
 } from './text-template';
 import { toPlainText } from './utils/to-plain-text';
-
-export type { SlotRecord, SlotValue } from './slots';
 
 export class CompiledTemplate<
   TSlots extends Record<string, SlotValue> = Record<string, SlotValue>,
@@ -137,9 +132,22 @@ export async function compile<
   node: Renderable,
   options?: CompileOptions,
 ): Promise<CompiledTemplate<TSlots>> {
-  const html = removeSolidResourceScripts(
-    await renderToStringAsync(normalizeRenderable(node), solidRenderOptions),
-  );
+  let renderError: unknown;
+  let hasError = false;
+  const stream = renderToStream(normalizeRenderable(node), {
+    ...solidRenderOptions,
+    noScripts: true,
+    onError(err) {
+      hasError = true;
+      renderError = err;
+    },
+  });
+  const rawHtml = await stream;
+  if (hasError) {
+    throw renderError;
+  }
+
+  const html = removeSolidResourceScripts(rawHtml);
   return new CompiledTemplate<TSlots>(html, options);
 }
 

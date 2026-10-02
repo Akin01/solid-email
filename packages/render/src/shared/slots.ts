@@ -1,5 +1,7 @@
-import type { JSX } from 'solid-js';
-import { ssr } from 'solid-js/web/dist/server.js';
+import type { JSX } from '@solidjs/web';
+import { ssr } from '@solidjs/web';
+
+export { ssr } from '@solidjs/web';
 
 const MARKER_PREFIX = '__SM_';
 const CONTENT_START = `${MARKER_PREFIX}CNT_`;
@@ -47,6 +49,7 @@ export interface SlotOccurrence {
 export function buildSlotLookup(html: string): {
   content: Map<string, SlotOccurrence[]>;
   attr: Map<string, string[]>;
+  requiredSlots: string[];
 } {
   const contentSlots = new Map<string, SlotOccurrence[]>();
   const attrSlots = new Map<string, string[]>();
@@ -123,8 +126,19 @@ export function buildSlotLookup(html: string): {
       attrSlots.set(name, [match[0]]);
     }
   }
+  const requiredSlots: string[] = [];
+  for (const [name, occurrences] of contentSlots) {
+    if (!occurrences.some((occ) => occ.hasDefault)) {
+      requiredSlots.push(name);
+    }
+  }
+  for (const name of attrSlots.keys()) {
+    if (!contentSlots.has(name)) {
+      requiredSlots.push(name);
+    }
+  }
 
-  return { content: contentSlots, attr: attrSlots };
+  return { content: contentSlots, attr: attrSlots, requiredSlots };
 }
 
 export function Slot(props: {
