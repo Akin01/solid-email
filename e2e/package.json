@@ -7,6 +7,6 @@
     "@tanstack/solid-router": "catalog:",
     "@tanstack/solid-start": "catalog:",
     "vite": "catalog:",
-    "vite-plugin-solid": "catalog:"
+    "@solidjs/vite-plugin": "catalog:"
   }
 }
