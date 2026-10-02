@@ -15,9 +15,10 @@
   },
   "dependencies": {
     "@akin01/solid-email": "workspace:*",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
-    "react-email": "6.6.3",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-email": "catalog:",
+    "@solidjs/web": "catalog:",
     "solid-js": "catalog:"
   },
   "devDependencies": {
@@ -25,7 +26,7 @@
     "@types/react": "catalog:",
     "tsconfig": "workspace:*",
     "typescript": "catalog:",
-    "vite-plugin-solid": "catalog:",
+    "@solidjs/vite-plugin": "catalog:",
     "vitest": "catalog:"
   }
 }

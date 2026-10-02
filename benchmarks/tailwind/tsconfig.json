@@ -13,7 +13,7 @@
     "../utils.ts",
     "../rendering/fixture-data.ts",
     "../rendering/solid-email-template.tsx",
-    "../../packages/render/src/shared/solid-js-web-server.d.ts"
+    "../../packages/solid-email/src/render-shim.d.ts"
   ],
   "exclude": ["dist", "node_modules"]
 }
