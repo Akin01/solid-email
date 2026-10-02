@@ -31,61 +31,61 @@ Solid Email keeps the authoring experience close to a modern Solid app while pro
 
 Measured with `pnpm benchmark:rendering` on the repository marketing email fixture. Lower mean time is better.
 
-| Renderer | Template | Mean | Throughput | Comparison |
-| --- | --- | ---: | ---: | --- |
-| Solid Email `render()` | Static JSX | 2.2919ms | 436.33 hz | 5.02x faster than React Email `render()` |
-| Solid Email `renderSync()` | Static JSX | 1.8935ms | 528.13 hz | 6.08x faster than React Email `render()` |
-| Solid Email `render()` | Tailwind JSX | 3.1230ms | 320.20 hz | 5.69x faster than React Email Tailwind |
-| Solid Email `compileSync` render (cached) | Static JSX | **0.0438ms** | **22,842 hz** | 263x faster than React Email `render()` |
-| Solid Email `compile` render (cached) | Static JSX | 0.0858ms | 11,661 hz | 134x faster than React Email `render()` |
-| Solid Email `compile` render (cached) | Tailwind JSX | 0.0452ms | 22,145 hz | **393x faster than React Email Tailwind** |
-| React Email `render()` | Static JSX | 11.5084ms | 86.89 hz | Baseline |
-| React Email `render()` | Tailwind JSX | 17.7760ms | 56.26 hz | Tailwind baseline |
+| Renderer | Template | v1 Mean | v2 Mean | v2 Throughput | Comparison (vs React Email) |
+| --- | --- | ---: | ---: | ---: | --- |
+| Solid Email `compileSync` (cached) | Static JSX | 0.0438ms | **0.0386ms** | **25,927 hz** | **294x faster** |
+| Solid Email `compile` Tailwind (cached) | Tailwind JSX | 0.0452ms | **0.0506ms** | **19,773 hz** | **385x faster** |
+| Solid Email `compile` (cached) | Static JSX | 0.0858ms | **0.0520ms** | **19,240 hz** | **218x faster** |
+| Solid Email `renderSync()` | Static JSX | 1.8935ms | **1.2689ms** | **788.08 hz** | **8.95x faster** |
+| Solid Email `render()` | Static JSX | 2.2919ms | **1.9760ms** | **506.06 hz** | **5.75x faster** |
+| Solid Email `render()` | Tailwind JSX | 3.1230ms | **2.4926ms** | **401.19 hz** | **7.82x faster** |
+| React Email `render()` | Static JSX | 11.5084ms | 10.2234ms | 97.81 hz | Baseline |
+| React Email `render()` | Tailwind JSX | 17.7760ms | 16.8971ms | 59.18 hz | Tailwind baseline |
 
 **Cached** means the template is compiled once and only the render step is measured. This is the expected production usage — compile at module load, render per request. The "one-time" compile+render cost is comparable to calling `render()` directly.
 
 Plain-text benchmarks measured with `pnpm benchmark:html-to-text` on the repository HTML-to-text fixtures. Lower mean time is better.
 
-| Operation | Fixture | Mean | Throughput | Comparison |
-| --- | --- | ---: | ---: | --- |
-| `@solid-email/render` `toPlainText` | HTML fixtures | 2.4369ms | 410.36 hz | 3.40x faster than React Email `toPlainText` |
-| `@solid-email/render` compiled text template | Solid JSX | **1.4434ms** | **692.83 hz** | **8.61x faster than React Email plain-text render** |
-| `@solid-email/render` uncompiled `renderSync` plain text | Solid JSX | 2.8895ms | 346.09 hz | 4.30x faster than React Email plain-text render |
-| `@solid-email/html-to-text` `convert` | HTML fixtures | 3.9657ms | 252.16 hz | Direct package converter |
-| `html-to-text` `convert` | HTML fixtures | 3.8166ms | 262.01 hz | Direct converter baseline |
-| React Email `toPlainText` | HTML fixtures | 8.2867ms | 120.67 hz | React text conversion baseline |
-| React Email `render` plain text | React JSX | 12.4310ms | 80.44 hz | React plain-text render baseline |
+| Operation | Fixture | v1 Mean | v2 Mean | v2 Throughput | Comparison (vs React Email) |
+| --- | --- | ---: | ---: | ---: | --- |
+| `@solid-email/render` `toPlainText` | HTML fixtures | 2.4369ms | **1.7383ms** | **575.29 hz** | **3.58x faster** |
+| `@solid-email/render` compiled text template | Solid JSX | 1.4434ms | **0.2913ms** | **3,432.87 hz** | **189x faster** |
+| `@solid-email/render` uncompiled `renderSync` | Solid JSX | 2.8895ms | **3.3323ms** | **300.10 hz** | **3.48x faster** |
+| `@solid-email/html-to-text` `convert` | HTML fixtures | 3.9657ms | **1.6586ms** | **602.91 hz** | **5.56x faster** |
+| `html-to-text` `convert` | HTML fixtures | 3.8166ms | 3.6168ms | 276.48 hz | Direct converter baseline |
+| React Email `toPlainText` | HTML fixtures | 8.2867ms | 6.2313ms | 160.48 hz | React text conversion baseline |
+| React Email `render` plain text | React JSX | 12.4310ms | 10.7571ms | 92.96 hz | React plain-text render baseline |
 
 Cross-library benchmarks measured with `pnpm benchmark:cross-library` on the
 marketing email template, using 50 iterations × 10 runs after 3 warmup runs.
 Lower average time is better.
 
-| Library / mode | Avg | Min | Max | Ops/s | Output | Heap Δ | Conformance | vs React Email |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| Solid Email `renderSync` | 1.17ms | 764µs | 1.47ms | 853 | 22.6 KB | **<0.01 MB** | 100% | 1.5x faster |
-| Solid Email `compileSync` render (cached) | **12µs** | **9µs** | **15µs** | **83,483** | 23.4 KB | **<0.01 MB** | 100% | **148.4x faster** |
-| JSX Email `render` | 3.82ms | 3.25ms | 5.45ms | 262 | **18.2 KB** | 1.15 MB | 100% | 2.1x slower |
-| React Email `render` | 1.78ms | 1.37ms | 4.00ms | 563 | 22.5 KB | 26.36 MB | 100% | Baseline |
-| MJML React `render` | 11.01ms | 9.39ms | 14.74ms | 91 | 75.5 KB | 1.57 MB | 100% | 6.2x slower |
+| Library / mode | v1 Avg | v2 Avg | Min | Max | Ops/s | Output | Heap Δ | Conformance | vs React Email |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| Solid Email `compileSync` (cached) | 12µs | **20µs** | **17µs** | **27µs** | **49,108** | 23.2 KB | **0.50 MB** | 100% | **125.8x faster** |
+| Solid Email `renderSync` | 1.17ms | **645µs** | **501µs** | **897µs** | **1,551** | 22.4 KB | **0.56 MB** | 100% | **4.0x faster** |
+| React Email `render` | 1.78ms | 3.31ms | 1.84ms | 7.99ms | 302 | 22.3 KB | 26.51 MB | 100% | Baseline |
+| JSX Email `render` | 3.82ms | 5.13ms | 4.43ms | 7.18ms | 195 | **18.2 KB** | 1.38 MB | 100% | 1.5x slower |
+| MJML React `render` | 11.01ms | 11.84ms | 10.16ms | 14.80ms | 84 | 75.5 KB | 1.65 MB | 100% | 3.6x slower |
 
 All cross-library outputs reached 100% pairwise conformance against the shared
 email template checks.
 
 Bundle size compares built ESM entry files after `pnpm build`; gzip uses Node's `zlib.gzipSync`.
 
-| Package entry | Raw size | Gzip size | Comparison |
+| Package entry | v1 Raw (Gzip) | v2 Raw (Gzip) | Comparison |
 | --- | ---: | ---: | --- |
-| `@akin01/solid-email/dist/index.mjs` | 199.0 KiB | 42.7 KiB | Server/root components and render utility re-exports |
-| `@akin01/solid-email/dist/client/index.mjs` | 105.9 KiB | 19.5 KiB | Browser-condition DOM preview build |
-| `@solid-email/render/dist/node/index.mjs` | **26.3 KiB** | **6.2 KiB** | Renderer entry |
-| Solid Email server entries | 225.3 KiB | 48.9 KiB | **6.4x smaller raw / 7.1x smaller gzip than React Email** |
-| Solid Email all ESM condition entries | 331.2 KiB | 68.4 KiB | 4.4x smaller raw / 5.1x smaller gzip than React Email |
-| `react-email/dist/index.mjs` | 1,448.0 KiB | 348.6 KiB | React Email baseline |
+| `@solid-email/render/dist/node/index.mjs` | 26.3 KiB (6.2 KiB) | **26.7 KiB (6.2 KiB)** | Dedicated node/server renderer entry |
+| `@akin01/solid-email/dist/client/index.mjs` | 105.9 KiB (19.5 KiB) | 106.3 KiB (19.5 KiB) | Browser-condition DOM preview build |
+| `@akin01/solid-email/dist/index.mjs` | 199.0 KiB (42.7 KiB) | 203.0 KiB (43.3 KiB) | Server/root components and render utility re-exports |
+| `@solid-email/render/dist/browser/index.mjs` | — | 197.4 KiB (45.2 KiB) | Standalone browser renderer entry (new in v2) |
+| Solid Email server entries combined | 225.3 KiB (48.9 KiB) | 229.7 KiB (49.5 KiB) | **4.8x smaller raw / 6.8x smaller gzip than React Email** |
+| `react-email` distribution total | 1,448.0 KiB (348.6 KiB) | 1,110.0 KiB (334.7 KiB) | React Email baseline |
 
 ## Install
 
 ```sh
-pnpm add @akin01/solid-email @solid-email/render solid-js
+pnpm add @akin01/solid-email @solid-email/render solid-js @solidjs/web
 ```
 
 ## Getting started
@@ -387,5 +387,5 @@ pnpm lint
 ---
 
 <div align="center">
-  Build with ❤️, MIT License.
+  Build with ❤️ MIT License.
 </div>

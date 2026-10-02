@@ -4,7 +4,7 @@ description: Use when building, reviewing, testing, or documenting HTML email te
 license: MIT
 metadata:
   author: Ainul Yaqin
-  version: "0.1.5"
+  version: "2.0.0-beta"
   homepage: https://github.com/akin01/solid-email
   source: https://github.com/akin01/solid-email
 ---
@@ -24,7 +24,7 @@ Use this skill when the task involves:
 ## Install
 
 ```sh
-pnpm add @akin01/solid-email @solid-email/render solid-js
+pnpm add @akin01/solid-email @solid-email/render solid-js @solidjs/web
 ```
 
 ## Basic template
@@ -81,10 +81,10 @@ const html = renderSync(() => (
 
 Use the `@akin01/solid-email` package root when mounting email components into
 the browser DOM for previews. Browser-condition bundlers resolve the root to the
-DOM-safe Solid DOM build. Pair it with Solid's DOM renderer from `solid-js/web`.
+DOM-safe Solid DOM build. Pair it with Solid's DOM renderer from `@solidjs/web`.
 
 ```tsx
-import { render as mount } from 'solid-js/web';
+import { render as mount } from '@solidjs/web';
 import { Body, Container, Heading, Html, Text } from '@akin01/solid-email';
 
 mount(
@@ -174,7 +174,7 @@ const compiled = await compile<MySlots>(
 Pass slot markers through props when adapting existing prop-driven components:
 
 ```tsx
-import type { JSX } from 'solid-js';
+import type { JSX } from '@solidjs/web';
 import { compile, Slot, slot } from '@solid-email/render';
 
 function Button(props: { href: string; children: JSX.Element }) {

@@ -1,6 +1,6 @@
 {
   "name": "@solid-email/html-to-text",
-  "version": "0.1.1",
+  "version": "2.0.0-beta",
   "description": "HTML to plain text converter used by Solid Email rendering",
   "type": "module",
   "sideEffects": false,
@@ -30,6 +30,7 @@
   },
   "scripts": {
     "build": "tsdown",
+    "format": "biome format --write .",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
