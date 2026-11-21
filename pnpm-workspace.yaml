@@ -14,9 +14,9 @@ catalog:
   '@biomejs/biome': 2.5.0
   '@cloudflare/vite-plugin': 1.43.0
   '@faire/mjml-react': 4.0.1
-  '@solidjs/signals': 2.0.0-rc.13
-  '@solidjs/vite-plugin': 3.0.0-next.47
-  '@solidjs/web': 2.0.0-rc.13
+  '@solidjs/signals': 2.0.3
+  '@solidjs/vite-plugin': 3.0.1
+  '@solidjs/web': 2.0.3
   '@tanstack/solid-router': 2.0.0-rc.8
   '@tanstack/solid-start': 2.0.0-rc.8
   '@types/css-tree': 2.3.11
@@ -35,7 +35,7 @@ catalog:
   react: 19.3.0
   react-dom: 19.3.0
   react-email: 6.11.0
-  solid-js: 2.0.0-rc.13
+  solid-js: 2.0.3
   tailwindcss: 4.3.1
   tsdown: 0.23.0
   tsx: 4.21.0
