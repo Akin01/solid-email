@@ -25,7 +25,8 @@ describe('render', () => {
         '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">',
       ),
     ).toBe(true);
-    expect(html).toContain('<div>Hello 世界</div>');
+    expect(html).toMatch(/<div>Hello (?:世界|&#19990;&#30028;)<\/div>/);
+    expect(toPlainText(html)).toContain('Hello 世界');
   });
 
   it('renders an already constructed JSX node', async () => {
@@ -161,8 +162,13 @@ describe('render', () => {
       </section>
     ));
 
-    expect(html).toContain('情報Ⅰコース担当者様');
-    expect(html).toContain('平素よりお世話になっております。');
+    // SolidJS v2 SSR template compiler encodes non-ASCII characters as HTML numeric entities
+    // to preserve character fidelity across email clients and transfer encodings.
+    expect(html).toContain(
+      '&#24773;&#22577;&#8544;&#12467;&#12540;&#12473;&#25285;&#24403;&#32773;&#27096;',
+    );
+    expect(toPlainText(html)).toContain('情報Ⅰコース担当者様');
+    expect(toPlainText(html)).toContain('平素よりお世話になっております。');
   });
 
   it('renders large email bodies without resource scripts', async () => {
