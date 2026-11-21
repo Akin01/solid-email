@@ -1,6 +1,6 @@
 {
   "name": "solid-email-monorepo",
-  "version": "2.0.0-beta",
+  "version": "2.0.0",
   "private": true,
   "repository": {
     "type": "git",

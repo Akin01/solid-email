@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.0.0 - 2026-11-21
+
+### Changed
+
+- Bumped `@akin01/solid-email`, `@solid-email/render`, `@solid-email/html-to-text`, and workspace packages to `2.0.0` stable release.
+- Bumped SolidJS to v2 stable release (`solid-js@2.0.3`, `@solidjs/web@2.0.3`, `@solidjs/signals@2.0.3`, and `@solidjs/vite-plugin@3.0.1`).
+- Updated `@akin01/solid-email` peerDependencies to stable `^2.0.0` for `solid-js` and `@solidjs/web`.
+- Adapted render tests for SolidJS v2 SSR template entity encoding of static multibyte characters while confirming UTF-8 fidelity through `toPlainText()` and dynamic expressions.
+- Fixed E2E test runner process management and path resolution for Windows platform compatibility.
+
 ## 2.0.0-beta - 2026-10-02
 
 ### Breaking Changes
