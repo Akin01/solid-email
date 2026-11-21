@@ -4,11 +4,13 @@ import { readFile, rm } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
+import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const execFileAsync = promisify(execFile);
-const root = path.resolve(new URL('..', import.meta.url).pathname);
+const pnpmBin = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
+const root = fileURLToPath(new URL('..', import.meta.url));
 const e2eRoot = path.join(root, 'e2e');
 
 type RenderExportCase = {
@@ -293,31 +295,33 @@ type PreviewServer = {
   stop: () => Promise<void>;
 };
 
+async function rmWithRetry(target: string): Promise<void> {
+  await rm(target, {
+    recursive: true,
+    force: true,
+    maxRetries: 10,
+    retryDelay: 300,
+  });
+}
+
 async function cleanFixture(fixture: FixtureName): Promise<void> {
   const fixtureRoot = path.join(e2eRoot, fixture);
-  await rm(path.join(fixtureRoot, 'dist'), { recursive: true, force: true });
-  await rm(path.join(fixtureRoot, '.types'), { recursive: true, force: true });
-  await rm(path.join(fixtureRoot, '.render'), { recursive: true, force: true });
-  await rm(path.join(fixtureRoot, '.output'), { recursive: true, force: true });
-  await rm(path.join(fixtureRoot, '.tanstack'), {
-    recursive: true,
-    force: true,
-  });
-  await rm(path.join(fixtureRoot, '.wrangler'), {
-    recursive: true,
-    force: true,
-  });
-  await rm(path.join(fixtureRoot, 'src/routeTree.gen.ts'), {
-    force: true,
-  });
+  await rmWithRetry(path.join(fixtureRoot, 'dist'));
+  await rmWithRetry(path.join(fixtureRoot, '.types'));
+  await rmWithRetry(path.join(fixtureRoot, '.render'));
+  await rmWithRetry(path.join(fixtureRoot, '.output'));
+  await rmWithRetry(path.join(fixtureRoot, '.tanstack'));
+  await rmWithRetry(path.join(fixtureRoot, '.wrangler'));
+  await rmWithRetry(path.join(fixtureRoot, 'src/routeTree.gen.ts'));
 }
 
 async function runPnpm(args: string[], cwd = root): Promise<string> {
   try {
-    const { stdout } = await execFileAsync('pnpm', args, {
+    const { stdout } = await execFileAsync(pnpmBin, args, {
       cwd,
       env: { ...process.env, CI: '1' },
       maxBuffer: 1024 * 1024 * 20,
+      shell: process.platform === 'win32',
     });
     return stdout;
   } catch (error) {
@@ -378,12 +382,13 @@ async function getAvailablePort(): Promise<number> {
 
 function startFixturePreview(fixtureRoot: string, port: number): PreviewServer {
   const child = spawn(
-    'pnpm',
+    pnpmBin,
     ['run', 'preview', '--port', String(port), '--strictPort'],
     {
       cwd: fixtureRoot,
       env: { ...process.env, CI: '1' },
       stdio: ['ignore', 'pipe', 'pipe'],
+      shell: process.platform === 'win32',
     },
   );
   let output = '';
@@ -402,10 +407,29 @@ function startFixturePreview(fixtureRoot: string, port: number): PreviewServer {
         return;
       }
 
-      child.kill('SIGTERM');
-      await new Promise<void>((resolve) => {
-        child.once('exit', () => resolve());
-      });
+      if (process.platform === 'win32' && child.pid) {
+        try {
+          await execFileAsync('taskkill', [
+            '/pid',
+            String(child.pid),
+            '/T',
+            '/F',
+          ]);
+        } catch {
+          // ignore if process already exited
+        }
+      } else {
+        child.kill('SIGTERM');
+      }
+      await Promise.race([
+        new Promise<void>((resolve) => {
+          child.once('exit', () => resolve());
+        }),
+        delay(3000),
+      ]);
+      if (process.platform === 'win32') {
+        await delay(500);
+      }
     },
   };
 }
@@ -505,18 +529,20 @@ afterAll(async () => {
     cleanFixture('tanstack-start'),
     cleanFixture('cloudflare-tanstack-start'),
   ]);
-  await rm(path.join(e2eRoot, '.tmp'), { recursive: true, force: true });
+  await rmWithRetry(path.join(e2eRoot, '.tmp'));
 });
 
 describe('published package integration fixtures', () => {
   it('resolves and loads render package conditional exports', async () => {
     for (const entry of renderExportCases) {
-      await expect(resolveRenderImport(entry), entry.name).resolves.toContain(
-        `/dist/${entry.target}/index.mjs`,
-      );
-      await expect(resolveRenderRequire(entry), entry.name).resolves.toContain(
-        `/dist/${entry.target}/index.cjs`,
-      );
+      await expect(
+        resolveRenderImport(entry).then((s) => s.replaceAll('\\', '/')),
+        entry.name,
+      ).resolves.toContain(`/dist/${entry.target}/index.mjs`);
+      await expect(
+        resolveRenderRequire(entry).then((s) => s.replaceAll('\\', '/')),
+        entry.name,
+      ).resolves.toContain(`/dist/${entry.target}/index.cjs`);
     }
   });
 
