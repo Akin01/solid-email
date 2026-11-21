@@ -1,6 +1,6 @@
 {
   "name": "@akin01/solid-email",
-  "version": "2.0.0-beta",
+  "version": "2.0.0",
   "description": "High-quality Solid components for creating emails",
   "repository": {
     "type": "git",
