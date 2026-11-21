@@ -66,8 +66,8 @@
     "tailwindcss": "catalog:"
   },
   "peerDependencies": {
-    "@solidjs/web": "^2.0.0-rc.0",
-    "solid-js": "^2.0.0-rc.0"
+    "@solidjs/web": "^2.0.0",
+    "solid-js": "^2.0.0"
   },
   "devDependencies": {
     "@solidjs/vite-plugin": "catalog:",
